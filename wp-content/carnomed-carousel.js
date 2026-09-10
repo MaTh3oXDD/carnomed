@@ -46,45 +46,58 @@
 
     var oryginalne = wpisy.length;
 
-    // Pętla przesuwa taśmę o długość jednego pełnego zestawu wpisów.
-    // Żeby w tej chwili nie odsłonić pustego miejsca, taśma musi być
-    // dłuższa od okna o co najmniej ten zestaw — przy trzech wpisach na
-    // szerokim ekranie jedno powielenie nie wystarcza, więc dokładamy
-    // kolejne zestawy aż warunek będzie spełniony.
-    function uzupelnijKlony() {
-      var szerokoscOkna = okno.clientWidth || 1;
+    // Długość jednego zestawu mierzona na żywo: od lewej krawędzi pierwszego
+    // wpisu do lewej krawędzi jego pierwszego klonu. Wlicza odstęp między
+    // ostatnim wpisem a klonem, którego nie łapało dzielenie scrollWidth
+    // przez liczbę zestawów — stąd był skok o szerokość jednego odstępu
+    // przy każdym zamknięciu pętli.
+    function dlugoscZestawu() {
+      var slajdy = tasma.children;
+      if (slajdy.length <= oryginalne) return 0;
+      return slajdy[oryginalne].offsetLeft - slajdy[0].offsetLeft;
+    }
+
+    function dodajZestaw() {
+      for (var i = 0; i < oryginalne; i++) {
+        var klon = tasma.children[i].cloneNode(true);
+        klon.setAttribute("aria-hidden", "true");
+        // klon nie może przechwytywać fokusu — to ta sama treść
+        Array.prototype.forEach.call(klon.querySelectorAll("a"), function (a) {
+          a.setAttribute("tabindex", "-1");
+        });
+        tasma.appendChild(klon);
+      }
+    }
+
+    // W chwili zamknięcia pętli taśma stoi przesunięta o jeden zestaw,
+    // więc za oknem musi zostać jeszcze co najmniej okno treści. Warunek
+    // sprawdzany przy każdej zmianie szerokości: taśma zbudowana na wąskim
+    // oknie po rozciągnięciu przeglądarki odsłaniała pusty koniec.
+    function przelicz() {
+      if (tasma.children.length <= oryginalne) dodajZestaw();
+      var zestaw = dlugoscZestawu();
+      if (!zestaw) return;
+      var potrzeba = okno.clientWidth + zestaw;
       var bezpiecznik = 0;
-      while (tasma.scrollWidth < szerokoscOkna * 2 && bezpiecznik < 12) {
-        var slajdy = tasma.querySelectorAll(".cm-karuzela-slajd");
-        for (var i = 0; i < oryginalne; i++) {
-          var klon = slajdy[i].cloneNode(true);
-          klon.setAttribute("aria-hidden", "true");
-          // klon nie może przechwytywać fokusu — to ta sama treść
-          Array.prototype.forEach.call(klon.querySelectorAll("a"), function (a) {
-            a.setAttribute("tabindex", "-1");
-          });
-          tasma.appendChild(klon);
-        }
+      while (tasma.scrollWidth < potrzeba && bezpiecznik < 12) {
+        dodajZestaw();
         bezpiecznik++;
       }
-      return bezpiecznik + 1; // liczba zestawów na taśmie
+      tasma.style.setProperty("--cm-dystans", zestaw + "px");
+      tasma.style.setProperty("--cm-czas", zestaw / PREDKOSC + "s");
     }
 
-    var zestawy = uzupelnijKlony();
-
-    function ustawTempo() {
-      var dystans = tasma.scrollWidth / zestawy; // długość jednego zestawu
-      if (!dystans) return;
-      tasma.style.setProperty("--cm-dystans", dystans + "px");
-      tasma.style.setProperty("--cm-czas", dystans / PREDKOSC + "s");
-    }
-
-    ustawTempo();
-    window.addEventListener("resize", ustawTempo);
-    // obrazy dochodzą po starcie i zmieniają szerokość taśmy
-    Array.prototype.forEach.call(okno.querySelectorAll("img"), function (img) {
-      if (!img.complete) img.addEventListener("load", ustawTempo);
+    przelicz();
+    var czekaj;
+    window.addEventListener("resize", function () {
+      clearTimeout(czekaj);
+      czekaj = setTimeout(przelicz, 120);
     });
+    // obrazy i font dochodzą po starcie i zmieniają szerokość taśmy
+    Array.prototype.forEach.call(okno.querySelectorAll("img"), function (img) {
+      if (!img.complete) img.addEventListener("load", przelicz);
+    });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(przelicz);
 
     okno.classList.add("cm-karuzela-gotowa");
   }
