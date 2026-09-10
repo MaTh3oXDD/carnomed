@@ -89,10 +89,18 @@
 
     przelicz();
     var czekaj;
-    window.addEventListener("resize", function () {
+    function przeliczPozniej() {
       clearTimeout(czekaj);
       czekaj = setTimeout(przelicz, 120);
-    });
+    }
+    // ResizeObserver patrzy na samo okno karuzeli, więc łapie każdą zmianę
+    // jego szerokości — także taką, przy której window nie dostaje "resize"
+    // (zmiana layoutu, pasek przewijania, osadzenie w ramce).
+    if (window.ResizeObserver) {
+      new ResizeObserver(przeliczPozniej).observe(okno);
+    } else {
+      window.addEventListener("resize", przeliczPozniej);
+    }
     // obrazy i font dochodzą po starcie i zmieniają szerokość taśmy
     Array.prototype.forEach.call(okno.querySelectorAll("img"), function (img) {
       if (!img.complete) img.addEventListener("load", przelicz);
