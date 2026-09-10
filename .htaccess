@@ -1,0 +1,129 @@
+# =============================================================
+# carno-med.pl — konfiguracja Apache
+# FAZA 0.1 (mapa 301) + FAZA 3.4 (naglowki, cache, kompresja)
+# =============================================================
+
+Options -Indexes
+ServerSignature Off
+
+# ------------------------------------------------
+# 1. KANONIZACJA HOSTA I PROTOKOLU
+# ------------------------------------------------
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# http -> https
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule ^(.*)$ https://carno-med.pl/$1 [R=301,L]
+
+# www -> bez www
+RewriteCond %{HTTP_HOST} ^www\.carno-med\.pl$ [NC]
+RewriteRule ^(.*)$ https://carno-med.pl/$1 [R=301,L]
+
+# ------------------------------------------------
+# 2. MAPA PRZEKIEROWAN 301
+# ------------------------------------------------
+
+# 2a. Scalenie duplikatu tresci (4513 slow identycznych)
+RewriteRule ^badania-naukowe/?$ https://carno-med.pl/skladniki/ [R=301,L]
+
+# 2b. Kanibalizacja: dwa artykuly o karnozynie jako "eliksirze mlodosci"
+#     scalone w /karnozyna-substancja-xxi-wieku/
+RewriteRule ^karnozyna-substancja-xxi-wieku-zwana-eliksirem-mlodosci/?$ https://carno-med.pl/karnozyna-substancja-xxi-wieku/ [R=301,L]
+
+# 2c. Usunieta strona autora (duplikat strony glownej)
+RewriteRule ^author/marcin/?$ https://carno-med.pl/o-nas/ [R=301,L]
+RewriteRule ^author/?$ https://carno-med.pl/o-nas/ [R=301,L]
+
+# 2d. Stare sciezki WordPressa bez odpowiednika na statyku
+RewriteRule ^wp-json(/.*)?$ https://carno-med.pl/ [R=301,L]
+RewriteRule ^feed/?$ https://carno-med.pl/blog/ [R=301,L]
+RewriteRule ^comments/feed/?$ https://carno-med.pl/blog/ [R=301,L]
+RewriteRule ^xmlrpc\.php$ https://carno-med.pl/ [R=301,L]
+RewriteRule ^wp-login\.php$ https://carno-med.pl/ [R=301,L]
+
+# 2e. ?p=ID i ?page_id=ID -> strona glowna
+RewriteCond %{QUERY_STRING} ^p=\d+$ [OR]
+RewriteCond %{QUERY_STRING} ^page_id=\d+$
+RewriteRule ^$ https://carno-med.pl/? [R=301,L]
+
+# ------------------------------------------------
+# 3. NORMALIZACJA UKOSNIKA KONCOWEGO
+#    /karnozin-extra -> /karnozin-extra/
+# ------------------------------------------------
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} !(/$|\.[a-zA-Z0-9]{2,5}$)
+RewriteRule ^(.*)$ https://carno-med.pl/$1/ [R=301,L]
+</IfModule>
+
+# ------------------------------------------------
+# 4. NAGLOWKI BEZPIECZENSTWA (FAZA 3.4)
+# ------------------------------------------------
+<IfModule mod_headers.c>
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+Header always set Cross-Origin-Opener-Policy "same-origin"
+
+# Content-Security-Policy — wersja zgodna z obecnymi zaleznosciami.
+# Po usunieciu pushpushgo i Font Awesome mozna zaostrzyc do 'self'.
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://s-eu-1.pushpushgo.com; style-src 'self' 'unsafe-inline' https://use.fontawesome.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://use.fontawesome.com data:; img-src 'self' data: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com; connect-src 'self' https://s-eu-1.pushpushgo.com; base-uri 'self'; form-action 'self'"
+
+# Usun naglowek ujawniajacy stack
+Header unset X-Powered-By
+Header unset X-Pingback
+</IfModule>
+
+# ------------------------------------------------
+# 5. CACHE (FAZA 3.4)
+# ------------------------------------------------
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresDefault                          "access plus 1 month"
+ExpiresByType text/html                 "access plus 0 seconds"
+ExpiresByType image/webp                "access plus 1 year"
+ExpiresByType image/avif                "access plus 1 year"
+ExpiresByType image/jpeg                "access plus 1 year"
+ExpiresByType image/png                 "access plus 1 year"
+ExpiresByType image/svg+xml             "access plus 1 year"
+ExpiresByType text/css                  "access plus 1 year"
+ExpiresByType application/javascript    "access plus 1 year"
+ExpiresByType font/woff2                "access plus 1 year"
+ExpiresByType application/xml           "access plus 1 hour"
+</IfModule>
+
+<IfModule mod_headers.c>
+<FilesMatch "\.(css|js|webp|avif|jpg|jpeg|png|gif|svg|woff|woff2|ttf|eot)$">
+Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+<FilesMatch "\.html$">
+Header set Cache-Control "public, max-age=0, must-revalidate"
+</FilesMatch>
+</IfModule>
+
+# ------------------------------------------------
+# 6. KOMPRESJA
+# ------------------------------------------------
+<IfModule mod_brotli.c>
+AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/plain text/xml application/javascript application/json image/svg+xml
+</IfModule>
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json image/svg+xml
+</IfModule>
+
+# ------------------------------------------------
+# 7. TYPY MIME
+# ------------------------------------------------
+<IfModule mod_mime.c>
+AddType image/webp .webp
+AddType image/avif .avif
+AddType font/woff2 .woff2
+</IfModule>
+
+# ------------------------------------------------
+# 8. STRONA 404
+# ------------------------------------------------
+ErrorDocument 404 /404.html

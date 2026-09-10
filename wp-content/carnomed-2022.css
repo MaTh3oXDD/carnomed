@@ -1,0 +1,2132 @@
+/* ==========================================================================
+   Carnomed — warstwa wyglądu 2022
+   Przenosi system wizualny etykiet (ETYKIETA_163x70mm, 22-04-2022) na stronę.
+   Ładowana jako ostatni arkusz. Nie modyfikuje Divi ani plików motywu.
+   Usunięcie <link> do tego pliku przywraca poprzedni wygląd w całości.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tokeny
+   Akcenty próbkowane bezpośrednio z PDF etykiet.
+   --accent      — grafika: siatka, pasy, ornamenty, obramowania
+   --accent-soft — stany hover, wypełnienia, drugi plan siatki
+   --accent-ink  — tekst i ikony; przyciemniony do kontrastu >= 4.5:1 na bieli
+   -------------------------------------------------------------------------- */
+:root {
+  --cm-paper:        #ffffff;
+  --cm-surface:      #fafaf9;
+  --cm-surface-deep: #f3f2f0;
+  --cm-ink:          #313131;
+  --cm-ink-soft:     #6b6969;
+  --cm-ink-faint:    #979696;
+  --cm-hairline:     #e2e2e2;
+  --cm-hairline-strong: #c9c8c6;
+
+  /* Akcent stron nieprodukowych — zieleń z etykiety Sulforafan Extra.
+     Kolor nie jest wymyślony: to ta sama wartość, którą nosi jedno
+     z opakowań, więc strona bierze go z własnej linii produktowej,
+     zamiast dokładać barwę spoza systemu.
+
+     Rozdzielony na dwie role, bo #41854c daje na bieli 4,48:1 — tuż
+     poniżej progu czytelności. Grafika (siatka, obrysy, pasy) zostaje
+     w pełnym kolorze etykiety, tekst schodzi do ciemniejszego 5,31:1. */
+  --accent:      #41854c;
+  --accent-soft: #73a57b;
+  --accent-ink:  #3b7845;
+
+  /* Folia. Nazwa produktu na opakowaniu jest tłoczona metalicznie —
+     jasny błysk u góry, ciemniejsze wybrzuszenie u dołu. Trzy stopnie
+     odtwarzają ten gradient na tekście. */
+  /* Siatka rysuje się akcentem. Zieleń jest nasycona, więc krycie schodzi
+     do wartości używanej na stronach produktowych — przy 0,5, dobranym
+     wcześniej pod bladą szarość, wzór przebijałby przez treść. */
+  --cm-mesh-color: var(--accent);
+  --cm-mesh-alpha: 0.2;
+
+  --foil-hi:  #7fb389;
+  --foil-mid: #41854c;
+  --foil-lo:  #2a5a32;
+
+  --cm-font: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /* skala typograficzna — proporcje z układu etykiety */
+  --cm-step--1: 0.8125rem;
+  --cm-step-0:  0.9375rem;
+  --cm-step-1:  1.125rem;
+  --cm-step-2:  1.5rem;
+  --cm-step-3:  2.125rem;
+  --cm-step-4:  3rem;
+
+  --cm-tracking-wide:  0.14em;
+  --cm-tracking-wider: 0.22em;
+}
+
+body.p-kolostrum {
+  --cm-mesh-color: var(--accent);
+  --cm-mesh-alpha: 0.16;
+  --accent: #bb9b69; --accent-soft: #cdb590; --accent-ink: #8a6d3f;
+  --foil-hi: #e6d3ae; --foil-mid: #bb9b69; --foil-lo: #7d6134;
+}
+body.p-karnozin {
+  --cm-mesh-color: var(--accent);
+  --cm-mesh-alpha: 0.16;
+  --accent: #864462; --accent-soft: #a6758b; --accent-ink: #864462;
+  --foil-hi: #b07a94; --foil-mid: #864462; --foil-lo: #57263d;
+}
+body.p-q10 {
+  --cm-mesh-color: var(--accent);
+  --cm-mesh-alpha: 0.16;
+  --accent: #a7a9ab; --accent-soft: #b2b4b6; --accent-ink: #5f6367;
+  --foil-hi: #d8dade; --foil-mid: #8f9296; --foil-lo: #5f6367;
+}
+body.p-stimuno {
+  --cm-mesh-color: var(--accent);
+  --cm-mesh-alpha: 0.16;
+  --accent: #c46628; --accent-soft: #d38e61; --accent-ink: #a9531d;
+  --foil-hi: #e0a074; --foil-mid: #c46628; --foil-lo: #8c4315;
+}
+body.p-sulforafan {
+  --cm-mesh-color: var(--accent);
+  --cm-mesh-alpha: 0.16;
+  --accent: #41854c; --accent-soft: #73a57b; --accent-ink: #41854c;
+  --foil-hi: #7fb389; --foil-mid: #41854c; --foil-lo: #2a5a32;
+}
+
+/* CreGAAtine stoi poza systemem etykiet z 2022 — nie ma białej etykiety
+   z cienką siatką, tylko czarne pudełko z jaskrawą żółcią. Kolory wzięte
+   ze zdjęcia opakowania: żółć #fee83a i czerń #1f1f1f.
+
+   Żółć jest tu wyłącznie plamą, nigdy literą: na bieli daje 1,25:1,
+   czyli tekst nieczytelny. Na opakowaniu działa tak samo — żółta karta
+   z czarnym drukiem, żółte logo na czarnym pudle. Dlatego --accent-ink,
+   czyli kolor tekstu, to czerń pudełka, a nie żółć. */
+/* Podział ról jest wzięty wprost z opakowania: czerń drukuje, żółć jest
+   plamą pod drukiem. Dlatego --accent, którym cały arkusz rysuje kreski,
+   obrysy i separatory, to tutaj czerń pudełka — żółta kreska na bieli daje
+   1,25:1 i po prostu znika. Żółć dostaje własny token i wchodzi wyłącznie
+   tam, gdzie jest wypełnieniem: przycisk, pasek pod nazwą, podświetlenie. */
+body.p-cregaatine {
+  --accent:      #1f1f1f;
+  --accent-soft: #4a4a4a;
+  --accent-ink:  #1f1f1f;
+  --cm-zolc:     #fee83a;
+  --cm-czern:    #1f1f1f;
+  --cm-czern-gleboka: #141414;
+  /* Siatka bierze czerń pudełka, nie żółć: przy 0,08 krycia żółć na bieli
+     znika zupełnie, a grafit czyta się jak reszta stron produktowych. */
+  --cm-mesh-color: #1f1f1f;
+  --cm-mesh-alpha: 0.08;
+  /* Tłoczenie nazwy to matowa czerń pudełka z jaśniejszą górną krawędzią,
+     a nie żółć. Wordmark na opakowaniu jest drukiem, nie plamą — żółty
+     gradient dawałby na bieli 1,25:1, czyli nazwę nie do odczytania. */
+  --foil-hi: #4a4a4a; --foil-mid: #1f1f1f; --foil-lo: #0d0d0d;
+}
+
+/* --------------------------------------------------------------------------
+   2. Podłoże
+   Etykieta jest biała. Wszystkie kolorowe tła sekcji ustępują bieli;
+   rytm buduje typografia i hairline, nie plamy koloru.
+   -------------------------------------------------------------------------- */
+/* Biel niosą tylko body i #page-container. Warstwy wewnętrzne zostają
+   przezroczyste, inaczej zakryłyby siatkę rysowaną na #page-container. */
+body,
+#page-container {
+  background-color: var(--cm-paper) !important;
+  color: var(--cm-ink);
+}
+
+#et-main-area,
+#main-content {
+  background-color: transparent !important;
+  color: var(--cm-ink);
+}
+
+body,
+.et_pb_text,
+.et_pb_module,
+p, li, td, th, dd, dt, blockquote {
+  font-family: var(--cm-font);
+  font-weight: 300;
+  color: var(--cm-ink);
+}
+
+p, li, dd, blockquote {
+  font-size: var(--cm-step-0);
+  line-height: 1.75;
+  color: var(--cm-ink-soft);
+}
+
+/* Sekcje z tłem tracą kolor; zostaje subtelna zmiana wartości i hairline.
+   Naprzemienność daje rytm bez kolorowych pasów. */
+.et_pb_section,
+.et_pb_section.et_pb_with_background,
+.et_pb_row,
+.et_pb_column,
+.et_pb_module {
+  background-color: transparent !important;
+}
+
+.et_pb_section.et_pb_with_background {
+  background-color: var(--cm-surface) !important;
+  border-top: 1px solid var(--cm-hairline);
+  border-bottom: 1px solid var(--cm-hairline);
+}
+
+/* Sekcje z obrazem tła: obraz zostaje, ale przechodzi w monochrom
+   i jest wybielany, żeby tekst czytał się na białej bazie. */
+.et_pb_section.et_parallax_bg,
+.et_pb_section > .et_parallax_bg_wrap > .et_parallax_bg {
+  filter: grayscale(1) contrast(0.82) brightness(1.16);
+}
+
+/* --------------------------------------------------------------------------
+   3. Typografia
+
+   Etykieta rozdziela dwie role i nie miesza ich:
+     — CARNOMED oraz podpisy: cienki krój, wersaliki, szerokie światło
+     — nazwa produktu: gruby grotesk, CIASNY tracking, czerń
+     — druga linia nazwy: jeszcze cięższa, większa, tłoczona metalicznie
+
+   To rozdzielenie niesie całą osobowość opakowania: rozstrzelenie należy
+   do drobnych podpisów, nie do nazwy. Nazwa ma być zwarta i ciężka.
+   -------------------------------------------------------------------------- */
+h1, h2, h3, h4, h5, h6,
+.et_pb_module h1, .et_pb_module h2, .et_pb_module h3,
+.et_pb_module h4, .et_pb_module h5, .et_pb_module h6 {
+  font-family: var(--cm-font) !important;
+  color: var(--cm-ink) !important;
+  text-transform: uppercase;
+  line-height: 1.1;
+  text-shadow: none !important;
+}
+
+/* Nazwa produktu — zwarta i ciężka, jak "KOMPLEX" na opakowaniu. */
+h1, .et_pb_module h1 {
+  font-size: var(--cm-step-4) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.015em !important;
+  color: #1a1a1a !important;
+  margin-bottom: 0.35em;
+}
+
+h2, .et_pb_module h2 {
+  font-size: var(--cm-step-3) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+  color: #1a1a1a !important;
+}
+
+h3, .et_pb_module h3 {
+  font-size: var(--cm-step-2) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.005em !important;
+}
+
+/* Podpisy i etykietki — tu rozstrzelenie jest na miejscu. */
+h4, h5, h6,
+.et_pb_module h4, .et_pb_module h5, .et_pb_module h6 {
+  font-size: var(--cm-step-1) !important;
+  font-weight: 500 !important;
+  letter-spacing: var(--cm-tracking-wider);
+  color: var(--accent-ink) !important;
+}
+
+/* Wyróżnienie w nagłówku poza stronami produktowymi — sam akcent,
+   bez tłoczenia. Sygnatura opakowania zostaje przy produktach. */
+h1 span[style*="color:"],
+h2 span[style*="color:"],
+h1 strong, h2 strong,
+h1 em, h2 em,
+.cm-lead {
+  font-weight: 800 !important;
+  font-style: normal;
+  color: var(--accent-ink) !important;
+}
+
+/* --- Druga linia nazwy produktu: tłoczenie foliowe -----------------------
+   Na opakowaniu "Q10" jest wytłoczone metalicznie — jaśniejsze u góry,
+   ciemniejsze u dołu — i stoi pod pierwszą linią, wyraźnie większe.
+   To ona, nie linia pierwsza, jest właściwym znakiem produktu.
+
+   Celowo tylko na .cm-product: to jedyny mocny gest w całym systemie
+   i traci sens, gdy trafia na zwykły nagłówek marketingowy.
+
+   Kolor bazowy jest ustawiony normalnie, więc bez obsługi
+   background-clip tekst pozostaje czytelny w pełnym akcencie. */
+/* Zakres zawężony do nagłówka pierwszej sekcji, bo znak produktu na
+   opakowaniu występuje dokładnie raz. Dalej na stronie ta sama nazwa
+   pada w zdaniach — „Światowa Organizacja Antydopingowa i Karnozin extra"
+   — i tam tłoczenie rozbijało zdanie na dwa człony o skrajnie różnej
+   wadze. Ten sam powód, dla którego sygnatura nie wychodzi poza strony
+   produktowe: użyta wszędzie przestaje cokolwiek znaczyć. */
+body.cm-product #et-main-area .et_pb_section:first-of-type h1 span[style*="color:"],
+body.cm-product #et-main-area .et_pb_section:first-of-type h1 strong,
+body.cm-product #et-main-area .et_pb_section:first-of-type h1 em,
+body.cm-product .cm-lead {
+  display: block;
+  font-size: 1.45em !important;
+  line-height: 1.02;
+  margin-top: 0.06em;
+  letter-spacing: -0.01em !important;
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  body.cm-product #et-main-area .et_pb_section:first-of-type h1 span[style*="color:"],
+  body.cm-product #et-main-area .et_pb_section:first-of-type h1 strong,
+  body.cm-product #et-main-area .et_pb_section:first-of-type h1 em,
+  body.cm-product .cm-lead {
+    background-image: linear-gradient(
+      177deg,
+      var(--foil-hi) 0%,
+      var(--foil-mid) 46%,
+      var(--foil-lo) 62%,
+      var(--foil-mid) 82%,
+      var(--foil-hi) 100%
+    );
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* Indeks górny ® nie bierze udziału w tłoczeniu — na opakowaniu jest
+   drobnym znakiem prawnym, nie częścią nazwy. */
+h1 span[style*="color:"] sup,
+h2 span[style*="color:"] sup,
+h1 sup, h2 sup {
+  font-size: 0.34em !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  -webkit-text-fill-color: var(--accent-ink);
+  vertical-align: super;
+}
+
+/* Nadlinia — mały rozstrzelony podpis nad nagłówkiem, jak "Suplement diety" */
+.cm-eyebrow {
+  display: block;
+  font-size: var(--cm-step--1);
+  font-weight: 600;
+  letter-spacing: var(--cm-tracking-wider);
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin-bottom: 0.9em;
+}
+
+/* --------------------------------------------------------------------------
+   4. Neutralizacja poprzedniej palety
+   Tęcza Divi i stara paleta marki mapowane na akcent lub grafit.
+   Selektory atrybutowe łapią również style inline w treści stron.
+   -------------------------------------------------------------------------- */
+[style*="color: #2ea3f2"], [style*="color:#2ea3f2"],
+[style*="color: #0693e3"], [style*="color:#0693e3"],
+[style*="color: #00d084"], [style*="color:#00d084"],
+[style*="color: #91599f"], [style*="color:#91599f"],
+[style*="color: #ab1dfe"], [style*="color:#ab1dfe"] {
+  color: var(--accent-ink) !important;
+}
+
+/* Stara paleta była nakładana zarówno na nagłówki, jak i na akapity.
+   Domyślnie schodzi więc do szarości tekstowej — akcentem na etykiecie
+   pisana jest nazwa produktu i pojedyncze wyróżnienia, nie zdania.
+   Akcent w treści ciągłej dawał dodatkowo złoty tekst na bieli,
+   czyli kontrast poniżej progu czytelności. */
+[style*="color: #729d3e"], [style*="color:#729d3e"],
+[style*="color: #83a04d"], [style*="color:#83a04d"],
+[style*="color: #c2d453"], [style*="color:#c2d453"],
+[style*="color: #c2d455"], [style*="color:#c2d455"],
+[style*="color: #d5da3a"], [style*="color:#d5da3a"],
+[style*="color: #d5ae1d"], [style*="color:#d5ae1d"],
+[style*="color: #aaae2e"], [style*="color:#aaae2e"],
+[style*="color: #82c0c7"], [style*="color:#82c0c7"] {
+  color: var(--cm-ink-soft) !important;
+}
+
+/* Akcent wraca tam, gdzie etykieta rzeczywiście go używa:
+   w nazwie produktu i w wyróżnieniach. */
+h1[style*="color:"], h2[style*="color:"],
+h3[style*="color:"], h4[style*="color:"],
+h1 [style*="color:"], h2 [style*="color:"],
+h3 [style*="color:"], h4 [style*="color:"],
+strong[style*="color:"], b[style*="color:"],
+strong [style*="color:"], b [style*="color:"] {
+  color: var(--accent-ink) !important;
+}
+
+[style*="color: #5e5e5e"], [style*="color:#5e5e5e"],
+[style*="color: #666666"], [style*="color:#666666"] {
+  color: var(--cm-ink-soft) !important;
+}
+
+/* Divi maluje linkami i akcentami na własnym błękicie */
+a { color: var(--accent-ink); text-decoration: none; }
+a:hover { color: var(--cm-ink); text-decoration: underline; text-underline-offset: 0.25em; }
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   5. Siatka low-poly
+   Sygnaturowy element etykiety. Rysowana jako maska, nie obrazek —
+   dzięki temu dziedziczy --accent i nie wymaga pięciu wariantów pliku.
+   -------------------------------------------------------------------------- */
+.cm-mesh,
+.et_pb_section.cm-mesh {
+  position: relative;
+  isolation: isolate;
+}
+
+.cm-mesh::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-color: var(--cm-mesh-color);
+  opacity: 0.34;
+  -webkit-mask-image: var(--cm-mesh-src);
+          mask-image: var(--cm-mesh-src);
+  -webkit-mask-repeat: repeat;
+          mask-repeat: repeat;
+  -webkit-mask-size: 1200px 900px;
+          mask-size: 1200px 900px;
+}
+
+:root {
+  --cm-mesh-src: url("/wp-content/carnomed-mesh.svg");
+}
+
+/* Siatka na całej stronie — bardzo cicha, żeby czytała się jako papier
+   etykiety, a nie jako wzór. Przypięta do viewportu i nieruchoma przy
+   przewijaniu: strona zachowuje się wtedy jak jeden arkusz, na którym
+   leży treść, zamiast jak taśma z powtarzającym się deseniem. */
+#page-container::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-color: var(--cm-mesh-color);
+  opacity: var(--cm-mesh-alpha);
+  -webkit-mask-image: var(--cm-mesh-src);
+          mask-image: var(--cm-mesh-src);
+  -webkit-mask-repeat: repeat;
+          mask-repeat: repeat;
+  -webkit-mask-size: 1200px 900px;
+          mask-size: 1200px 900px;
+  animation: cm-dryf 120s linear infinite;
+}
+
+/* --- Ruch siatki ---------------------------------------------------------
+   Maska przesuwa się o dokładnie jeden kafel (1200×900), więc pętla wraca
+   do punktu wyjścia bez szwu i bez przeskoku.
+
+   Tempo jest wolne — około 12 px na sekundę po przekątnej.
+   Wzór leży pod całą treścią; ma sprawiać wrażenie, że sieć żyje, a nie
+   zwracać na siebie uwagę. Warstwa strony i warstwa nagłówka płyną
+   w przeciwne strony i z różną prędkością, co daje wrażenie głębi. */
+@keyframes cm-dryf {
+  from { -webkit-mask-position: 0 0;            mask-position: 0 0; }
+  to   { -webkit-mask-position: 1200px 900px;   mask-position: 1200px 900px; }
+}
+
+@keyframes cm-dryf-odwrotny {
+  from { -webkit-mask-position: 0 0;              mask-position: 0 0; }
+  to   { -webkit-mask-position: -1200px 900px;    mask-position: -1200px 900px; }
+}
+
+/* --- Kolejność warstw ----------------------------------------------------
+   Siatka leży na #page-container::before, więc treść musi stać nad nią.
+   Wcześniej robił to selektor `#page-container > *` z z-index 1 — ale trafiał
+   również w nagłówek i zbijał jego własne wartości (Divi: #main-header 99999,
+   #top-header 100000, rozwijane 999999) do jedynki. Nagłówek przestawał
+   wtedy przykrywać przewijaną treść.
+
+   Warstwy są więc wypisane wprost, od dołu:
+       0        siatka tła
+       1        treść i stopka
+       99999    nagłówek
+     100000     pasek kontaktowy nad nagłówkiem
+    1000000     rozwijane menu — zawsze ponad wszystkim
+   ------------------------------------------------------------------------ */
+#et-main-area,
+#main-footer,
+#footer-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+/* Nagłówek przyklejony do góry okna.
+
+   W mirrorze to nie działało: <body> ma klasę et_fixed_nav i skrypt Divi
+   poprawnie dokłada .et-fixed-header przy przewijaniu, ale reguła, która
+   nadaje wtedy position:fixed, siedzi w arkuszu, który się nie pobrał —
+   zmierzone: position=relative, top=-1199, czyli nagłówek odjeżdżał razem
+   z treścią. Sam z-index tego nie naprawia.
+
+   Użyty jest sticky, nie fixed: element zostaje w normalnym przepływie,
+   więc treść pod nim nie podskakuje i nie trzeba dokładać kompensacji
+   paddingiem, którą fixed by wymusił. */
+html body #page-container #main-header,
+html body #page-container #main-header.et-fixed-header {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  /* Skrypt Divi wpisuje własny top w atrybucie style (zmierzone: 42px),
+     co zostawiało szczelinę nad przyklejonym nagłówkiem. Atrybut
+     przebija zwykłą regułę, stąd !important. */
+  top: 0 !important;
+  z-index: 99999;
+}
+
+/* Pasek kontaktowy zostaje nad nagłówkiem w kolejności warstw, ale
+   przewija się swobodnie — przyklejanie obu zabierałoby zbyt dużo
+   wysokości ekranu na telefonie. */
+html body #page-container #top-header,
+html body #page-container .et-fixed-header#top-header {
+  position: relative;
+  z-index: 100000;
+}
+
+/* Sticky przestaje działać, gdy którykolwiek przodek przycina zawartość.
+
+   Divi ustawia #page-container overflow-y:hidden, a <body> overflow-x:hidden.
+   Każdy z nich robi z siebie kontener przewijania dla elementów sticky
+   w środku. Ten kontener sam się nie przewija — przewija się okno — więc
+   nagłówek nigdy nie miał się do czego przykleić i odjeżdżał z treścią
+   (zmierzone: top -2957 przy scrollY 3000).
+
+   overflow-x:hidden na <body> był zabezpieczeniem przed poziomym paskiem.
+   Nie jest potrzebny: scrollWidth równa się clientWidth na każdej badanej
+   szerokości, więc nic nie wystaje. */
+html,
+html body,
+html body #page-container,
+html body #et-main-area {
+  overflow: visible !important;
+}
+
+/* Skrypt Divi dopisuje #page-container inline padding-top równy wysokości
+   nagłówka (zmierzone: 119px = 43px paska + 78px nawigacji). Ma on zrobić
+   miejsce pod nagłówek wyjęty z przepływu przez position:fixed.
+
+   Nagłówek jest tutaj sticky, więc zostaje w przepływie i miejsce zajmuje
+   sam. Padding stawał się przez to pustym pasem na samej górze strony,
+   a nagłówek startował dopiero pod nim. Wartość idzie z atrybutu style,
+   stąd !important. */
+html body #page-container {
+  padding-top: 0 !important;
+}
+
+/* Rozwijane listy muszą wyjść ponad nagłówek i ponad treść, także wtedy gdy
+   sekcja pod nimi tworzy własny kontekst nakładania. */
+html body #page-container .nav li ul,
+html body #page-container #top-menu li ul,
+html body #page-container #et-secondary-nav li ul,
+html body #page-container .et_mobile_menu,
+html body #page-container .et_pb_menu .et-menu li ul {
+  z-index: 1000000 !important;
+}
+
+/* Sekcje Divi izolują się przez isolation/transform i potrafiły wypłynąć
+   nad nagłówek. Zostają na własnym poziomie treści. */
+html body #page-container #et-main-area .et_pb_section {
+  z-index: auto;
+}
+
+/* Pierwsza sekcja każdej strony niesie siatkę mocniej — odpowiednik
+   centralnego panelu etykiety, na którym stoi nazwa produktu. */
+#et-main-area .et_pb_section:first-of-type {
+  position: relative;
+  isolation: isolate;
+}
+
+#et-main-area .et_pb_section:first-of-type::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-color: var(--cm-mesh-color);
+  opacity: 0.30;
+  -webkit-mask-image: var(--cm-mesh-src);
+          mask-image: var(--cm-mesh-src);
+  -webkit-mask-repeat: repeat;
+          mask-repeat: repeat;
+  -webkit-mask-size: 1200px 900px;
+          mask-size: 1200px 900px;
+  animation: cm-dryf-odwrotny 185s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   6. Pas akcentu
+   Etykieta domyka się ściętym pasem u góry i u dołu. Ten sam gest
+   zamyka nagłówek i stopkę strony.
+   -------------------------------------------------------------------------- */
+#main-header::after,
+#main-footer::before {
+  content: "";
+  display: block;
+  height: 6px;
+  background-color: var(--accent);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 26px) 100%, 26px 100%);
+}
+
+#main-footer::before {
+  clip-path: polygon(26px 0, calc(100% - 26px) 0, 100% 100%, 0 100%);
+}
+
+/* --------------------------------------------------------------------------
+   7. Nagłówek i nawigacja
+   -------------------------------------------------------------------------- */
+#main-header,
+#top-header,
+#main-header.et-fixed-header {
+  background-color: var(--cm-paper) !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--cm-hairline);
+}
+
+#top-header {
+  border-bottom: 1px solid var(--cm-hairline);
+  color: var(--cm-ink-soft);
+}
+
+#top-header a,
+#top-header .et-social-icon a {
+  color: var(--cm-ink-soft) !important;
+}
+
+#top-menu li a,
+.et_pb_menu .et-menu li a,
+#et-secondary-nav li a {
+  font-family: var(--cm-font);
+  font-size: 0.8125rem !important;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cm-ink) !important;
+  opacity: 1;
+  padding-bottom: 1.1em;
+}
+
+#top-menu li a:hover,
+.et_pb_menu .et-menu li a:hover {
+  color: var(--accent-ink) !important;
+  opacity: 1;
+}
+
+#top-menu li.current-menu-item > a,
+#top-menu li.current_page_item > a {
+  color: var(--accent-ink) !important;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+#top-menu li ul,
+.nav li ul {
+  background-color: var(--cm-paper) !important;
+  border-top: 2px solid var(--accent) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07) !important;
+}
+
+.mobile_menu_bar::before,
+.mobile_menu_bar::after,
+.et_toggle_slide_menu::after {
+  color: var(--cm-ink) !important;
+}
+
+.et_mobile_menu {
+  background-color: var(--cm-paper) !important;
+  border-top: 2px solid var(--accent) !important;
+}
+
+/* Logo zostaje bez zmian — decyzja klienta na tym etapie. */
+
+/* --------------------------------------------------------------------------
+   8. Przyciski
+   Etykieta nie ma plam koloru, więc przycisk domyślnie jest obrysem;
+   wypełnia się dopiero pod kursorem.
+   -------------------------------------------------------------------------- */
+.et_pb_button,
+.et_pb_button:hover,
+a.et_pb_button,
+.et_pb_contact_submit,
+input[type="submit"],
+button[type="submit"] {
+  font-family: var(--cm-font) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  letter-spacing: var(--cm-tracking-wide) !important;
+  text-transform: uppercase !important;
+  color: var(--accent-ink) !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 1px solid var(--accent) !important;
+  border-radius: 0 !important;
+  padding: 0.95em 2.4em !important;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.et_pb_button:hover,
+a.et_pb_button:hover,
+.et_pb_contact_submit:hover,
+input[type="submit"]:hover,
+button[type="submit"]:hover {
+  color: var(--cm-paper) !important;
+  background-color: var(--accent-ink) !important;
+  border-color: var(--accent-ink) !important;
+}
+
+/* Divi dokleja strzałkę po prawej — na etykiecie nic takiego nie ma */
+.et_pb_button::after,
+.et_pb_button::before {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   9. Trójkąt
+   Znak z etykiety, użyty jako ornament nagłówka sekcji.
+   Znaczeniowo: domyka blok, tak jak zamyka nazwę produktu na opakowaniu.
+   -------------------------------------------------------------------------- */
+/* Trójkąt jest wypełniony i tłoczony tą samą folią co nazwa, więc rysuje
+   go clip-path na gradiencie, a nie obrys z ramek. */
+.cm-tri::after,
+html body.cm-product #et-main-area .et_pb_section:first-of-type h1:has(span[style*="color:"])::after {
+  content: "";
+  display: block;
+  width: 26px;
+  height: 19px;
+  margin: 0.85em auto 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background-image: linear-gradient(
+    170deg,
+    var(--foil-hi) 0%,
+    var(--foil-mid) 52%,
+    var(--foil-lo) 100%
+  );
+}
+
+/* --------------------------------------------------------------------------
+   10. Tabele składu
+   Odwzorowanie tabeli z etykiety: nagłówek wersalikami, wartości do prawej,
+   hairline pod każdym wierszem, zero wypełnień.
+   -------------------------------------------------------------------------- */
+.entry-content table:not(.variations),
+.et_pb_text table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 0;
+  font-size: var(--cm-step--1);
+  margin: 1.6em 0;
+}
+
+.entry-content table:not(.variations) th,
+.et_pb_text table th {
+  background-color: transparent !important;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cm-ink-soft);
+  padding: 0 0 0.7em;
+  border: 0;
+  border-bottom: 1px solid var(--cm-ink);
+}
+
+.entry-content table:not(.variations) td,
+.et_pb_text table td {
+  background-color: transparent !important;
+  padding: 0.75em 0;
+  border: 0;
+  border-bottom: 1px solid var(--cm-hairline);
+  color: var(--cm-ink);
+  vertical-align: top;
+}
+
+.entry-content table:not(.variations) th:last-child,
+.entry-content table:not(.variations) td:last-child,
+.et_pb_text table th:last-child,
+.et_pb_text table td:last-child {
+  text-align: right;
+}
+
+/* --------------------------------------------------------------------------
+   11. Karty, obrazy, bloki treści
+   -------------------------------------------------------------------------- */
+.et_pb_blurb,
+.et_pb_promo,
+.et_pb_toggle,
+.et_pb_tabs,
+.et_pb_post,
+article.et_pb_post {
+  background-color: var(--cm-paper) !important;
+  border: 1px solid var(--cm-hairline) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 2rem !important;
+}
+
+/* Karta reaguje na kursor akcentem: obrys i tytuł nabierają koloru,
+   a trójkąt z etykiety wysuwa się spod tytułu. Kolor pojawia się tu
+   w reakcji na działanie, zamiast leżeć na sześciu tytułach naraz —
+   sześć zielonych nagłówków obok siebie zrobiłoby ścianę barwy. */
+.et_pb_blurb:hover,
+article.et_pb_post:hover {
+  border-color: var(--accent) !important;
+}
+
+/* Divi maluje tytuły kart własnym szaro-niebieskim #486066, spoza palety.
+   Wracają do grafitu systemu. */
+html body #page-container .et_pb_blurb h4,
+html body #page-container .et_pb_blurb h4 span,
+html body #page-container .et_pb_blurb .et_pb_module_header,
+html body #page-container .et_pb_blurb .et_pb_module_header span {
+  color: var(--cm-ink) !important;
+  transition: color 0.25s ease;
+}
+
+html body #page-container .et_pb_blurb:hover h4,
+html body #page-container .et_pb_blurb:hover h4 span,
+html body #page-container .et_pb_blurb:hover .et_pb_module_header,
+html body #page-container .et_pb_blurb:hover .et_pb_module_header span {
+  color: var(--accent-ink) !important;
+}
+
+/* Ikona traci szarość pod kursorem — karta „budzi się” w całości. */
+html body #page-container .et_pb_blurb:hover .et_pb_main_blurb_image img {
+  filter: none;
+  opacity: 1;
+}
+
+.et_pb_image img,
+.et_pb_post .entry-featured-image-url img,
+.et_pb_blurb_container img {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Zdjęcia produktowe stoją na białym tle etykiety — bez ramek i cieni. */
+.et_pb_image,
+.et_pb_image_wrap {
+  box-shadow: none !important;
+}
+
+.et_pb_toggle_title,
+.et_pb_tabs_controls li a {
+  font-family: var(--cm-font) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: var(--cm-step--1) !important;
+  color: var(--cm-ink) !important;
+}
+
+.et_pb_tabs_controls {
+  background-color: transparent !important;
+  border-bottom: 1px solid var(--cm-hairline) !important;
+}
+
+.et_pb_tabs_controls li.et_pb_tab_active {
+  background-color: transparent !important;
+  border-bottom: 2px solid var(--accent) !important;
+}
+
+.et_pb_tabs_controls li.et_pb_tab_active a {
+  color: var(--accent-ink) !important;
+}
+
+.et_pb_all_tabs,
+.et_pb_tab {
+  background-color: transparent !important;
+}
+
+blockquote {
+  border-left: 2px solid var(--accent) !important;
+  padding-left: 1.4em;
+  font-style: normal;
+  color: var(--cm-ink);
+}
+
+/* Separatory sekcji przechodzą na akcent. To najcieńszy możliwy nośnik
+   koloru — jedna kreska na styku sekcji — więc rytm strony dostaje barwę
+   bez dokładania plam. Na etykiecie te same hairline’y rozdzielają panele. */
+hr,
+html body #page-container .et_pb_divider::before {
+  border-top-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  opacity: 0.55;
+}
+
+/* --------------------------------------------------------------------------
+   12. Formularze
+   -------------------------------------------------------------------------- */
+/* Formularz stoi na arkuszu, nie na siatce.
+
+   Pola miały wypełnienie --cm-surface i włos --cm-hairline, a pod nimi
+   przewijała się animowana siatka low-poly. Przez jasne tło pól przebijał
+   wzór, więc krawędź pola i linia siatki miały niemal tę samą wartość i
+   formularz czytał się jak zbiór ledwie widocznych prostokątów.
+
+   Panel odcina to u źródła: papier pod całym modułem, siatka zostaje na
+   zewnątrz. Cień jest minimalny, tylko po to, żeby arkusz odkleił się od
+   tła — nie po to, żeby udawać głębię. */
+html body #page-container .et_pb_contact_form_container {
+  /* !important, bo sekcja 2 zeruje tła wszystkim modułom Divi
+     (`.et_pb_module { background-color: transparent !important }`) i bez tego
+     panel zostawał przezroczysty — siatka przechodziła przez formularz. */
+  background-color: var(--cm-paper) !important;
+  border: 1px solid var(--cm-hairline);
+  border-radius: 14px;
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  box-shadow:
+    0 1px 2px rgba(49, 49, 49, 0.04),
+    0 14px 34px -20px rgba(49, 49, 49, 0.30);
+}
+
+.et_pb_contact_form_container input,
+.et_pb_contact_form_container textarea,
+.et_pb_contact_form_container select,
+.et_pb_newsletter_form input,
+input[type="text"], input[type="email"], input[type="tel"],
+input[type="search"], textarea, select {
+  font-family: var(--cm-font) !important;
+  font-size: var(--cm-step-0) !important;
+  color: var(--cm-ink) !important;
+  background-color: var(--cm-surface) !important;
+  /* Na papierze panelu włos --cm-hairline dawał 1,09:1 wobec wypełnienia
+     pola. Mocniejsza wartość rysuje granicę pola, zamiast ją sugerować. */
+  border: 1px solid var(--cm-hairline-strong) !important;
+  border-radius: 8px !important;
+  padding: 0.9em 1em !important;
+}
+
+.et_pb_contact_form_container input:focus,
+.et_pb_contact_form_container textarea:focus,
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent) !important;
+  background-color: var(--cm-paper) !important;
+}
+
+/* W formularzu Divi nazwa pola istnieje wyłącznie jako placeholder —
+   właściwa etykieta jest ukryta dla czytników ekranu. To nie jest podpowiedź,
+   tylko jedyny opis pola, więc musi spełniać próg kontrastu dla tekstu:
+   --cm-ink-faint dawało 2,91:1, --cm-ink-soft daje 5,31:1. */
+::placeholder { color: var(--cm-ink-soft) !important; opacity: 1; }
+
+/* --------------------------------------------------------------------------
+   12b. Karty produktów na stronie głównej
+   --------------------------------------------------------------------------
+   Sekcja „Nasze suplementy” pokazywała dwa packshoty w oryginale 1000x1098
+   na pół szerokości rzędu: ~900px wysokości na dwa produkty, więc żaden
+   ekran nie mieścił ich razem, a o samym produkcie nie mówiły nic poza
+   jednym zdaniem. Karta jest pozioma — zdjęcie w stałej kolumnie, obok
+   tekst — dzięki czemu wysokość wyznacza treść, a nie proporcje fotografii.
+
+   Tabelka porcji to nie ozdoba: opakowanie suplementu ma z tyłu dokładnie
+   taki panel, więc karta powtarza układ, który klient i tak zobaczy na
+   pudełku. Etykieta z lewej, wartość z prawej, włos między wierszami. */
+/* Flex, nie grid z `auto-fit`. Rząd Divi rozciąga się do 90% okna, więc przy
+   szerokim ekranie (zmierzone: 1780px → rząd 1602px) `auto-fit` mieścił trzeci
+   tor. Karty siadały w dwóch pierwszych, pusty trzeci wisiał po prawej i
+   ciągnął całość w lewo — `justify-content: center` centrował blok razem z
+   nim. Flex tworzy dokładnie tyle kolumn, ile jest kart, więc pusty tor nie
+   ma jak powstać przy żadnej szerokości okna. */
+html body #page-container .cm-prod-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 1.5rem;
+}
+
+/* Rzędy Divi mają clearfix ::after. W układzie blokowym tylko czyścił
+   opływanie, we flexie staje się elementem rzędu: dostaje własny odstęp
+   24px na końcu i przesuwa obie karty o 12px w lewo od osi. Ta sama pułapka
+   co w #footer-widgets. */
+html body #page-container .cm-prod-row::after {
+  display: none;
+}
+
+html body #page-container .cm-prod-row > .cm-prod {
+  flex: 1 1 27rem;
+  max-width: 30rem;
+}
+
+html body #page-container .cm-prod {
+  display: grid;
+  grid-template-columns: 10.5rem minmax(0, 1fr);
+  gap: 1.5rem;
+  /* Kolumna z treścią rozciąga się na wysokość karty, żeby `margin-top:auto`
+     na przycisku zrównało przyciski obu kart mimo różnej długości opisów. */
+  align-items: stretch;
+  padding: 1.5rem;
+  background: var(--cm-paper);
+  border: 1px solid var(--cm-hairline);
+  border-radius: 14px;
+}
+
+/* Zdjęcie zostaje w swojej kolumnie i nie dyktuje wysokości karty. */
+html body #page-container .cm-prod-shot {
+  display: block;
+  align-self: start;
+}
+
+html body #page-container .cm-prod-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+html body #page-container .cm-prod-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+html body #page-container h3.cm-prod-name {
+  margin: 0 0 0.35rem !important;
+  padding: 0 !important;
+  font-family: var(--cm-font);
+  font-size: var(--cm-step-2) !important;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+html body #page-container .cm-prod-lead {
+  margin: 0 0 0.9rem !important;
+  font-size: var(--cm-step--1);
+  line-height: 1.55;
+  color: var(--cm-ink-soft);
+}
+
+html body #page-container .cm-prod-lead a {
+  color: var(--accent-ink) !important;
+}
+
+.cm-prod-spec {
+  /* Węższa od kolumny tekstu: wiersze „etykieta — wartość” czyta się parami,
+     a im dalej od siebie stoją oba końce, tym trudniej je zestawić. */
+  width: 100%;
+  max-width: 19rem;
+  margin: 0 0 1.1rem;
+  border-top: 1px solid var(--cm-hairline);
+}
+
+.cm-prod-spec .cm-spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--cm-hairline);
+}
+
+.cm-prod-spec dt {
+  font-size: var(--cm-step--1);
+  color: var(--cm-ink-faint);
+  line-height: 1.35;
+}
+
+.cm-prod-spec dd {
+  margin: 0;
+  font-size: var(--cm-step--1);
+  font-weight: 600;
+  color: var(--cm-ink);
+  text-align: right;
+  line-height: 1.35;
+  /* „2000 mg” łamane po liczbie czyta się jak dwie różne wartości. */
+  white-space: nowrap;
+}
+
+/* Przycisk zostaje przyciskiem Divi — kolory i ikona idą z jego własnych
+   klas. Tu tylko zejście z rozmiaru, bo w karcie tej wielkości domyślny
+   ciężar przejmował uwagę nad nazwą produktu. */
+html body #page-container .et_pb_section .cm-prod-cta {
+  margin-top: auto;
+  padding: 0.5rem 1.1rem !important;
+  font-size: var(--cm-step--1) !important;
+}
+
+@media (max-width: 600px) {
+  html body #page-container .cm-prod {
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.15rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   12c. Pasmo „Nasze suplementy” + „Sprawdzone suplementy”
+   --------------------------------------------------------------------------
+   Dwie sąsiadujące sekcje mówią o tym samym — czym są te produkty i dlaczego
+   można im ufać — a wyglądały jak dwa różne materiały: górna miała kropkowany
+   bitmapowy deseń Divi (bg-4.png) i własną ramkę, dolna gołe tło strony.
+
+   Zamiast malować obu wspólne tło, obie stają się przezroczyste. Pod całą
+   stroną leży już animowana siatka low-poly (`#page-container::before`,
+   przypięta do viewportu, dryf `cm-dryf` w 120s). Przezroczyste sekcje
+   pokazują dokładnie ten sam, nieprzerwany fragment tej siatki — pasmo czyta
+   się jako jedna płaszczyzna, bez szwu na styku i bez drugiej animacji,
+   która musiałaby się z pierwszą synchronizować. Kropkowana bitmapa odchodzi
+   przy okazji: nie da się jej przefarbować akcentem ani wpiąć w ten ruch. */
+html body #page-container div.et_pb_section.cm-band,
+html body #page-container div.et_pb_section.cm-band.et_pb_with_background {
+  background-color: transparent !important;
+  background-image: none !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  position: relative;
+}
+
+/* --- Kreska między sekcjami ----------------------------------------------
+   Szerokość kolumny treści, nie całego ekranu: linia ma dzielić materiał,
+   a nie obrysowywać stronę. Końce wygaszone, więc nie tworzy dwóch twardych
+   rogów przy krawędziach.
+
+   Po linii przechodzi powolny rozjaśniony impuls. To jedyny ruch dołożony
+   w tym miejscu i ma swoje uzasadnienie: tłem strony jest siatka połączeń,
+   a impuls biegnący wzdłuż połączenia jest tego samego rodzaju obrazem.
+   Siedem sekund na przebieg — dość wolno, by dało się to przeoczyć, jeśli
+   się nie patrzy. */
+html body #page-container .cm-band-top::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  z-index: 2;
+  width: min(1080px, 90%);
+  height: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background-image:
+    linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.9) 50%,
+      rgba(255, 255, 255, 0) 100%),
+    linear-gradient(90deg,
+      transparent 0%,
+      var(--accent) 16%,
+      var(--accent) 84%,
+      transparent 100%);
+  background-repeat: no-repeat, no-repeat;
+  background-size: 18% 100%, 100% 100%;
+  background-position: -25% 0, 0 0;
+  animation: cm-impuls 7s linear infinite;
+}
+
+@keyframes cm-impuls {
+  from { background-position: -25% 0, 0 0; }
+  to   { background-position: 125% 0, 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body #page-container .cm-band-top::after {
+    animation: none;
+    background-image: linear-gradient(90deg,
+      transparent 0%,
+      var(--accent) 16%,
+      var(--accent) 84%,
+      transparent 100%);
+    background-size: 100% 100%;
+    background-position: 0 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   12d. Treść widoczna od pierwszego malowania
+   --------------------------------------------------------------------------
+   Divi trzyma moduły z animacją wejścia pod `opacity: 0` i dolewa im klasę
+   .et-animated dopiero wtedy, gdy skrypt zauważy, że element wjechał w
+   widok (29 elementów .et-waypoint i 44 .et_animated na stronie głównej).
+   Do tego czasu strona stoi pusta, a w mirrorze skrypty ładują się na końcu
+   dokumentu — wejście na stronę wygląda jak niedokończone ładowanie.
+
+   Ukrywanie treści do czasu wykonania skryptu kosztuje więcej, niż daje:
+   zanim animacja zdąży cokolwiek powiedzieć, odwiedzający patrzy na puste
+   miejsce. Ruch na tej stronie niesie siatka w tle i impuls na kresce między
+   sekcjami; wjeżdżające bloki niczego do tego nie dokładają.
+
+   Reguła zeruje tylko własną nieprzezroczystość i animację modułu, nie
+   dotyka jego potomków, więc karuzela i inne elementy oparte na transformach
+   działają dalej. */
+html body #page-container .et-waypoint,
+html body #page-container .et-waypoint:not(.et_pb_counters),
+html body #page-container .et_animated,
+html body #page-container .et_had_animation {
+  opacity: 1 !important;
+  animation: none !important;
+  visibility: visible !important;
+}
+
+/* --------------------------------------------------------------------------
+   13. Stopka
+   -------------------------------------------------------------------------- */
+#main-footer,
+#footer-bottom,
+.footer-widget,
+#et-footer-nav {
+  background-color: var(--cm-paper) !important;
+  color: var(--cm-ink-soft) !important;
+}
+
+#footer-bottom {
+  border-top: 1px solid var(--cm-hairline);
+}
+
+#main-footer h1, #main-footer h2, #main-footer h3,
+#main-footer h4, #main-footer h5, #main-footer h6,
+.footer-widget h4 {
+  color: var(--cm-ink) !important;
+  font-size: var(--cm-step--1) !important;
+  letter-spacing: var(--cm-tracking-wider);
+  font-weight: 600 !important;
+}
+
+#main-footer a, #footer-bottom a, .footer-widget a {
+  color: var(--cm-ink-soft) !important;
+}
+
+#main-footer a:hover, #footer-bottom a:hover, .footer-widget a:hover {
+  color: var(--accent-ink) !important;
+}
+
+#footer-info { color: var(--cm-ink-faint) !important; }
+
+/* Widget „o nas” w stopce zawiera <img src=""> — miejsce na zdjęcie, którego
+   nikt nie wgrał. Pusty element rezerwował ~150 px wysokości, przez co
+   pierwsza kolumna stopki puchła do 337 px przy 156 px sąsiedniej i pod
+   stopką zostawał pusty pas. Przy pustym src przeglądarka próbuje jeszcze
+   pobrać adres bieżącej strony jako obrazek. */
+img[src=""],
+img:not([src]),
+#about-image:not([src]),
+#about-image[src=""] {
+  display: none !important;
+}
+
+/* Kolumny stopki. Siatka z auto-fit rozpisywała tory na całą szerokość
+   kontenera — przy trzech widgetach i szerokim ekranie powstawał czwarty,
+   pusty tor po prawej, a cały blok siadał niesymetrycznie względem strony.
+   Flex układa tylko tyle kolumn, ile jest widgetów, i trzyma je na osi
+   kontenera niezależnie od jego szerokości. */
+html body #page-container #footer-widgets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2rem 3rem;
+}
+
+/* Divi domyka stopkę starym clearfixem: #footer-widgets ma klasę .clearfix,
+   a ta dokłada ::after z `content:" "`. W układzie blokowym pseudoelement
+   tylko czyścił opływanie, ale we flexie liczy się jako pełnoprawny element
+   siatki — dostawał własny odstęp 48px na końcu rzędu i przesuwał wszystkie
+   kolumny o 24px w lewo od osi kontenera. Przy flexie nie ma czego czyścić. */
+html body #page-container #footer-widgets::after {
+  display: none;
+}
+
+html body #page-container #footer-widgets .footer-widget {
+  /* Sztywna podstawa bez rozciągania i kurczenia: kolumny o równej
+     szerokości układają się symetrycznie względem osi kontenera. Przy
+     `flex: 0 1` kolumna z logotypem puchła do szerokości swojej treści
+     i zbijała cały blok w lewo. */
+  flex: 0 0 17rem;
+  width: auto !important;
+  max-width: 100%;
+  margin: 0 !important;
+  float: none !important;
+}
+
+/* Kolumny stopki wyśrodkowane. Każda z nich to krótki blok — adres, jeden
+   link, dwa zdania zastrzeżenia — a nie ciągły tekst, więc oś symetrii
+   czyta się lepiej niż trzy niezależne krawędzie wyrównania do lewej.
+   Zastrzeżenie prawne dostaje ograniczoną miarę: wyśrodkowany akapit
+   szerszy niż ~46 znaków gubi początek kolejnego wiersza. */
+html body #page-container #footer-widgets .footer-widget,
+html body #page-container #footer-widgets .footer-widget h4.title {
+  text-align: center;
+}
+
+html body #page-container #footer-widgets .footer-widget p {
+  max-width: 34ch;
+  margin-inline: auto;
+}
+
+/* --- Karta Facebooka -------------------------------------------------------
+   Zastępuje wyłączony plugin społecznościowy (patrz restyle.py). Znak „f”
+   zostaje monochromatyczny: firmowy niebieski byłby jedynym takim kolorem
+   na stronie i rozbijałby zieloną paletę wziętą z opakowań. Rozpoznawalność
+   niesie sam kształt litery, a stan hover przechodzi na akcent, tak jak
+   pozostałe linki w stopce. */
+html body #page-container .footer-widget a.cm-fb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 1.25rem 1rem;
+  border: 1px solid var(--cm-hairline);
+  border-radius: 10px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--cm-ink-soft) !important;
+  transition: border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+html body #page-container .footer-widget a.cm-fb:hover,
+html body #page-container .footer-widget a.cm-fb:focus-visible {
+  border-color: var(--accent-soft);
+  color: var(--accent-ink) !important;
+  transform: translateY(-1px);
+}
+
+html body #page-container .footer-widget a.cm-fb:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 3px;
+}
+
+.cm-fb .cm-fb-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--cm-surface-deep);
+  color: var(--cm-ink);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.cm-fb:hover .cm-fb-mark,
+.cm-fb:focus-visible .cm-fb-mark {
+  background: var(--accent-ink);
+  color: var(--cm-paper);
+}
+
+.cm-fb .cm-fb-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.cm-fb .cm-fb-text strong {
+  font-weight: 600;
+  font-size: var(--cm-step-0);
+  color: var(--cm-ink);
+  line-height: 1.25;
+}
+
+.cm-fb:hover .cm-fb-text strong,
+.cm-fb:focus-visible .cm-fb-text strong {
+  color: inherit;
+}
+
+.cm-fb .cm-fb-text span {
+  font-size: var(--cm-step--1);
+  color: var(--cm-ink-faint);
+  line-height: 1.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body #page-container .footer-widget a.cm-fb,
+  .cm-fb .cm-fb-mark {
+    transition: none;
+  }
+  html body #page-container .footer-widget a.cm-fb:hover {
+    transform: none;
+  }
+}
+
+.et-social-icon a { color: var(--cm-ink-soft) !important; }
+.et-social-icon a:hover { color: var(--accent-ink) !important; }
+
+/* --------------------------------------------------------------------------
+   14. Baner cookies
+   -------------------------------------------------------------------------- */
+#cookie-law-info-bar {
+  background-color: var(--cm-ink) !important;
+  color: #ffffff !important;
+  font-family: var(--cm-font) !important;
+  font-size: var(--cm-step--1) !important;
+  border-top: 3px solid var(--accent) !important;
+  box-shadow: none !important;
+}
+
+#cookie-law-info-bar a,
+.cli-plugin-button,
+.cli_action_button {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  border-radius: 0 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   15. Podłoga jakościowa
+   -------------------------------------------------------------------------- */
+img { max-width: 100%; height: auto; }
+
+@media (max-width: 980px) {
+  :root {
+    --cm-step-3: 1.75rem;
+    --cm-step-4: 2.125rem;
+    --cm-tracking-wide: 0.1em;
+    --cm-tracking-wider: 0.16em;
+  }
+
+  .et_pb_blurb,
+  .et_pb_promo,
+  article.et_pb_post {
+    padding: 1.5rem !important;
+  }
+
+  #main-header::after,
+  #main-footer::before {
+    clip-path: none;
+  }
+}
+
+/* Na telefonie rozstrzelenie wersalików kosztuje więcej miejsca, niż jest
+   warte — nazwa produktu ma się zmieścić w jednej linii, tak jak na
+   etykiecie. Skala i tracking zjeżdżają, proporcje zostają. */
+@media (max-width: 767px) {
+  :root {
+    --cm-step-2: 1.25rem;
+    --cm-step-3: 1.5rem;
+    --cm-step-4: 1.75rem;
+    --cm-tracking-wide: 0.06em;
+    --cm-tracking-wider: 0.1em;
+  }
+
+  /* Tabela składu jest szeroka z natury — na wąskim ekranie przewija się
+     we własnym kontenerze, zamiast rozpychać stronę. */
+  html body #page-container .et_pb_text table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  #main-header::after,
+  #main-footer::before,
+  .cm-mesh::before,
+  #et-main-area .et_pb_section:first-of-type::before {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   16. Nadpisania o podwyższonej specyficzności
+
+   Divi generuje reguły postaci
+       body #page-container .et_pb_section .et_pb_button_3 { … !important }
+   o specyficzności (1,2,1). Deklaracja !important nie pomaga, jeśli
+   specyficzność jest niższa — kaskada porównuje ją wcześniej. Reguły niżej
+   celowo dokładają `html` i typ elementu, żeby przebić tamte o jeden punkt.
+
+   Ta sekcja istnieje wyłącznie z powodu specyficzności. Nie dokłada nowych
+   decyzji projektowych — powtarza te z sekcji 2, 7 i 8.
+   -------------------------------------------------------------------------- */
+
+/* Pasek kontaktowy — Divi trzyma go na .et_secondary_nav_enabled #page-container #top-header */
+html body.et_secondary_nav_enabled #page-container #top-header,
+html body #page-container #top-header,
+html body #page-container #et-secondary-nav {
+  background-color: var(--cm-paper) !important;
+  color: var(--cm-ink-soft) !important;
+  border-bottom: 1px solid var(--cm-hairline);
+}
+
+html body #page-container #top-header a,
+html body #page-container #top-header .et-social-icon a,
+html body #page-container #et-secondary-nav li a {
+  color: var(--cm-ink-soft) !important;
+}
+
+html body #page-container #top-header a:hover,
+html body #page-container #et-secondary-nav li a:hover {
+  color: var(--accent-ink) !important;
+}
+
+/* Numer telefonu jest teraz linkiem tel: — stuknięcie na telefonie od razu
+   dzwoni. Wygląda tak samo jak wcześniej, więc pasek się nie zmienia;
+   dochodzi tylko kursor wskazujący, że to element klikalny, oraz obszar
+   dotyku dociągnięty do 44 px wysokości — poniżej tej wartości trafienie
+   palcem staje się loterią. */
+html body #page-container #top-header a.cm-tel,
+html body #page-container #top-header a.cm-tel span {
+  color: inherit !important;
+  text-decoration: none;
+}
+
+html body #page-container #top-header a.cm-tel {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+html body #page-container #top-header a.cm-tel:hover,
+html body #page-container #top-header a.cm-tel:hover span,
+html body #page-container #top-header a.cm-tel:focus-visible,
+html body #page-container #top-header a.cm-tel:focus-visible span {
+  color: var(--accent-ink) !important;
+}
+
+/* Nagłówek i tło strony */
+html body #page-container #main-header,
+html body #page-container #main-header.et-fixed-header {
+  background-color: var(--cm-paper) !important;
+  box-shadow: none !important;
+}
+
+/* --- Nagłówek przypięty przy przewijaniu ---------------------------------
+   Po przewinięciu Divi dokłada klasę .et-fixed-header i wstawia własny
+   zestaw kolorów ze starej palety:
+
+     .et_fixed_nav #page-container .et-fixed-header#top-header
+         { background-color:#83a04d!important }
+
+   To specyficzność (2,2,0) — dwa identyfikatory i dwie klasy. Reguły
+   z sekcji wyżej mają (2,1,2) i przegrywają, bo kaskada porównuje klasy
+   przed elementami; !important tego nie odwraca. Stąd pasek kontaktowy
+   zmieniał się na zielony dopiero w trakcie przewijania.
+   Poniżej ta sama para klas plus elementy, czyli (2,2,2). */
+html body.et_fixed_nav #page-container .et-fixed-header#top-header,
+html body.et_fixed_nav #page-container .et-fixed-header#main-header,
+html body #page-container .et-fixed-header#top-header {
+  background-color: var(--cm-paper) !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--cm-hairline) !important;
+}
+
+html body.et_fixed_nav #page-container .et-fixed-header#top-header #et-secondary-nav li ul,
+html body #page-container .et-fixed-header#top-header #et-secondary-nav li ul {
+  background-color: var(--cm-paper) !important;
+  border-top: 2px solid var(--accent) !important;
+}
+
+html body.et_fixed_nav #page-container .et-fixed-header#top-header a,
+html body #page-container .et-fixed-header#top-header a,
+html body #page-container .et-fixed-header#top-header .et-social-icon a {
+  color: var(--cm-ink-soft) !important;
+}
+
+/* Aktywna pozycja menu w przypiętym nagłówku miała fiolet #91599f. */
+html body #page-container .et-fixed-header #top-menu li.current-menu-ancestor > a,
+html body #page-container .et-fixed-header #top-menu li.current-menu-item > a,
+html body #page-container .et-fixed-header #top-menu li.current_page_item > a {
+  color: var(--accent-ink) !important;
+}
+
+html body #page-container .et-fixed-header #top-menu li a {
+  color: var(--cm-ink) !important;
+}
+
+html body #page-container .et-fixed-header #top-menu li a:hover {
+  color: var(--accent-ink) !important;
+}
+
+/* Link do sklepu zostaje wypełniony również po przypięciu nagłówka. */
+html body #page-container .et-fixed-header #top-menu li.ds-custom-link-menu > a {
+  background-color: var(--accent-ink) !important;
+  color: var(--cm-paper) !important;
+}
+
+html body #page-container .et_pb_section {
+  background-color: transparent !important;
+}
+
+html body #page-container .et_pb_section.et_pb_with_background {
+  background-color: var(--cm-surface) !important;
+}
+
+/* Przyciski */
+/* Przyciski formularzy Divi to <button>, nie <a> — bez osobnego selektora
+   typu zostawały w starej palecie (zmierzone: zieleń #83a04d na „wyślij”,
+   pomarańcz #f58644 na „Prześlij”), mimo poprawnego już obrysu. */
+html body #page-container .et_pb_section a.et_pb_button,
+html body #page-container .et_pb_section a.et_pb_button:hover,
+html body #page-container .et_pb_section button.et_pb_button,
+html body #page-container a.et_pb_button,
+html body #page-container button.et_pb_button,
+html body #page-container button.et_pb_contact_submit,
+html body #page-container button.et_pb_contact_submit.et_pb_button,
+html body #page-container input.et_pb_contact_submit.et_pb_button,
+html body #page-container .et_pb_contact_form button.et_pb_contact_submit,
+html body #page-container .et_pb_contact_submit,
+html body #page-container input.et_pb_contact_submit,
+html body #page-container input[type="submit"],
+html body #page-container button[type="submit"] {
+  color: var(--accent-ink) !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 1px solid var(--accent) !important;
+  border-width: 1px !important;
+  border-radius: 0 !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  letter-spacing: var(--cm-tracking-wide) !important;
+  text-transform: uppercase !important;
+  padding: 0.95em 2.4em !important;
+}
+
+html body #page-container .et_pb_section a.et_pb_button:hover,
+html body #page-container .et_pb_section button.et_pb_button:hover,
+html body #page-container a.et_pb_button:hover,
+html body #page-container button.et_pb_button:hover,
+html body #page-container button.et_pb_contact_submit:hover,
+html body #page-container button.et_pb_contact_submit.et_pb_button:hover,
+html body #page-container .et_pb_contact_form button.et_pb_contact_submit:hover,
+html body #page-container .et_pb_contact_submit:hover,
+html body #page-container input.et_pb_contact_submit:hover,
+html body #page-container input[type="submit"]:hover,
+html body #page-container button[type="submit"]:hover {
+  color: var(--cm-paper) !important;
+  background-color: var(--accent-ink) !important;
+  border-color: var(--accent-ink) !important;
+  padding: 0.95em 2.4em !important;
+}
+
+/* Przycisk wysyłki formularza jest u Divi trzymany najgłębszym selektorem
+   w całym motywie:
+
+     body #page-container .et_pb_section
+       .et_pb_contact_form_0.et_pb_contact_form_container.et_pb_module
+       .et_pb_button                       { color:#83a04d !important }
+
+   To pięć klas — specyficzność (1,5,1). Wcześniejsze reguły miały (1,2,3)
+   i przegrywały mimo !important, więc przycisk „wyślij” zostawał zielony.
+   Poniżej ta sama liczba klas plus elementy, czyli (1,5,3). */
+html body #page-container .et_pb_section
+  .et_pb_contact_form_container.et_pb_module
+  button.et_pb_contact_submit.et_pb_button,
+html body #page-container
+  .et_pb_contact_form_container.et_pb_module
+  button.et_pb_contact_submit.et_pb_button.et_pb_button {
+  color: var(--accent-ink) !important;
+  background-color: transparent !important;
+  border: 1px solid var(--accent) !important;
+}
+
+html body #page-container .et_pb_section
+  .et_pb_contact_form_container.et_pb_module
+  button.et_pb_contact_submit.et_pb_button:hover,
+html body #page-container
+  .et_pb_contact_form_container.et_pb_module
+  button.et_pb_contact_submit.et_pb_button.et_pb_button:hover {
+  color: var(--cm-paper) !important;
+  background-color: var(--accent-ink) !important;
+  border-color: var(--accent-ink) !important;
+}
+
+/* Divi rozsuwa padding na hover, żeby zrobić miejsce na doklejaną strzałkę.
+   Strzałki nie ma, więc szerokość musi zostać stała. */
+html body #page-container a.et_pb_button::after,
+html body #page-container a.et_pb_button::before,
+html body #page-container a.et_pb_button:hover::after,
+html body #page-container a.et_pb_button:hover::before {
+  display: none !important;
+  content: none !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+}
+
+/* Link do sklepu w menu — jedyny wypełniony element nagłówka.
+   Etykieta też ma dokładnie jedną pełną plamę akcentu, resztę prowadzi
+   linią, więc CTA może ją tu przejąć. */
+html body #page-container #top-menu li.ds-custom-link-menu > a,
+html body #page-container .et_mobile_menu li.ds-custom-link-menu > a,
+html body #page-container .et-fixed-header #top-menu li.ds-custom-link-menu > a {
+  background-color: var(--accent-ink) !important;
+  color: var(--cm-paper) !important;
+  padding: 0.7em 1.4em !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  /* Wtyczka rysuje wokół tego linku limonkowy obrys #d5da3a ze starej
+     palety — bez tego zostawał jasny kant wokół wypełnionego przycisku. */
+  border: 1px solid var(--accent-ink) !important;
+}
+
+html body #page-container #top-menu li.ds-custom-link-menu > a:hover {
+  background-color: var(--cm-ink) !important;
+  color: var(--cm-paper) !important;
+}
+
+/* Menu główne */
+html body #page-container #top-menu li a {
+  color: var(--cm-ink) !important;
+}
+
+html body #page-container #top-menu li.current-menu-item > a,
+html body #page-container #top-menu li a:hover {
+  color: var(--accent-ink) !important;
+}
+
+html body #page-container .nav li ul,
+html body #page-container .et_mobile_menu {
+  background-color: var(--cm-paper) !important;
+  border-color: var(--accent) !important;
+}
+
+/* Obramowania i akcenty rozsiane po motywie */
+html body #page-container .et-search-form,
+html body #page-container blockquote {
+  border-color: var(--accent) !important;
+}
+
+html body #page-container .footer-widget li::before,
+html body #page-container .et_pb_pricing li::before {
+  border-color: var(--accent) !important;
+}
+
+/* Divi obramowuje moduły obrazów kolorem starej palety */
+html body #page-container .et_pb_image,
+html body #page-container .et_pb_image .et_pb_image_wrap,
+html body #page-container .et_pb_main_blurb_image img {
+  border-color: var(--cm-hairline) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Stopka */
+html body #page-container #main-footer,
+html body #page-container #footer-bottom,
+html body #page-container .footer-widget {
+  background-color: var(--cm-paper) !important;
+}
+
+/* Baner cookies — wtyczka podnosi styl z własnego arkusza i atrybutu style */
+html body #cookie-law-info-bar {
+  background-color: var(--cm-ink) !important;
+  color: #ffffff !important;
+  border-top: 3px solid var(--accent) !important;
+  font-family: var(--cm-font) !important;
+  font-size: 0.8125rem !important;
+  box-shadow: none !important;
+}
+
+html body #cookie-law-info-bar span,
+html body #cookie-law-info-bar a {
+  color: #ffffff !important;
+}
+
+html body #cookie-law-info-bar a.cli-plugin-button,
+html body #cookie-law-info-bar a.cli_action_button,
+html body #cookie-law-info-bar #cookie_action_close_header {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  border-radius: 0 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  padding: 0.55em 1.4em !important;
+}
+
+html body #cookie-law-info-bar a.cli-plugin-button:hover,
+html body #cookie-law-info-bar #cookie_action_close_header:hover {
+  background-color: #ffffff !important;
+  color: var(--cm-ink) !important;
+}
+
+/* --------------------------------------------------------------------------
+   17. Równa wysokość kafelków
+
+   Divi układa kolumny na floatach, więc sąsiednie karty kończą się na
+   różnej wysokości i dolna krawędź rzędu się rwie. Rząd przechodzi na
+   flex, kolumny rozciągają się do wspólnej wysokości, a karta wypełnia
+   swoją kolumnę.
+
+   Zakres celowo wąski — :has() ogranicza zmianę do rzędów, które faktycznie
+   zawierają karty. Flex na każdym rzędzie Divi rozjechałby układy mieszane.
+   -------------------------------------------------------------------------- */
+/* Rząd kart staje się siatką. Grid załatwia oba problemy naraz:
+   komórki w wierszu mają z definicji równą wysokość, a auto-fit sam
+   schodzi z trzech kolumn na dwie i na jedną, bez progów do pilnowania.
+   Divi wpisuje kolumnom szerokość i marginesy — trzeba je zdjąć,
+   inaczej biją się z torami siatki. */
+html body #page-container .et_pb_row:has(> .et_pb_column > .et_pb_blurb),
+html body #page-container .et_pb_row:has(> .et_pb_column > .et_pb_module > .et_pb_blurb) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(270px, 100%), 1fr));
+  gap: 1.75rem;
+  align-items: stretch;
+}
+
+html body #page-container .et_pb_row:has(> .et_pb_column > .et_pb_blurb) > .et_pb_column,
+html body #page-container .et_pb_row:has(> .et_pb_column > .et_pb_module > .et_pb_blurb) > .et_pb_column {
+  display: flex;
+  flex-direction: column;
+  float: none !important;
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+html body #page-container .et_pb_column > .et_pb_blurb {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  margin-bottom: 0 !important;
+}
+
+/* Rząd z jedną kartą to nie siatka kart. auto-fit rozpisuje wtedy tor po
+   torze na całą szerokość rzędu, karta zajmuje pierwszy, a puste tory po
+   prawej przesuwają ją — i nagłówek z tej samej kolumny — do lewej krawędzi.
+   Sekcja "Badania naukowe" jest jedynym takim rzędem na stronie głównej.
+   Jeden tor o szerokości karty plus wyśrodkowanie zostawia jej dotychczasowe
+   proporcje i stawia ją na osi rzędu. */
+html body #page-container .et_pb_row:has(> .et_pb_column:only-child > .et_pb_blurb),
+html body #page-container .et_pb_row:has(> .et_pb_column:only-child > .et_pb_module > .et_pb_blurb) {
+  grid-template-columns: min(34rem, 100%);
+  justify-content: center;
+}
+
+/* Divi zeruje górny padding modułu (zmierzone: 0px 32px 32px 32px), przez co
+   ikona dotykała górnej krawędzi karty. Tu wraca komplet, równo ze wszystkich
+   stron i hojniej — etykieta trzyma treść daleko od krawędzi i to samo
+   światło powinna mieć karta. */
+html body #page-container .et_pb_column > .et_pb_blurb,
+html body #page-container .et_pb_column > .et_pb_module.et_pb_blurb {
+  padding: 2.75rem 2.25rem !important;
+}
+
+/* Ikona ma własny odstęp od tytułu, żeby blok oddychał wewnątrz. */
+html body #page-container .et_pb_blurb .et_pb_main_blurb_image {
+  margin-bottom: 1.5rem !important;
+}
+
+html body #page-container .et_pb_blurb .et_pb_module_header {
+  margin-bottom: 0.75rem !important;
+}
+
+/* Opis rośnie, więc dolne krawędzie kart schodzą się równo nawet przy
+   bardzo różnej długości tekstów. */
+html body #page-container .et_pb_column > .et_pb_blurb .et_pb_blurb_description {
+  flex: 1 1 auto;
+}
+
+@media (min-width: 768px) {
+
+  /* Rzędy z listą wpisów bloga mają ten sam problem. */
+  html body #page-container .et_pb_row:has(> .et_pb_column > .et_pb_blog_grid) .et_pb_salvattore_content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.75rem;
+    align-items: stretch;
+  }
+
+  html body #page-container .et_pb_blog_grid .column {
+    width: auto !important;
+    margin: 0 !important;
+  }
+
+  html body #page-container .et_pb_blog_grid article.et_pb_post {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   19. Karuzela „Aktualności”
+
+   Wpisy płyną w jedną stronę zamiast stać w siatce. Ruch jest wolny i stały
+   — ma sygnalizować, że dział żyje, a nie przyciągać wzrok; dlatego nie ma
+   przeskoków, wygaszania ani strzałek. Taśma zatrzymuje się pod kursorem
+   i przy fokusie, żeby dało się przeczytać i kliknąć.
+   -------------------------------------------------------------------------- */
+.cm-karuzela {
+  position: relative;
+  overflow: hidden;
+  /* Zajawki gasną przy krawędziach, więc wpis nie ucina się twardo
+     — taśma wygląda na dłuższą niż okno, którym patrzymy. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+}
+
+.cm-karuzela-tasma {
+  display: flex;
+  align-items: stretch;
+  gap: 1.75rem;
+  width: max-content;
+  will-change: transform;
+}
+
+.cm-karuzela-gotowa .cm-karuzela-tasma {
+  animation: cm-plyn var(--cm-czas, 30s) linear infinite;
+}
+
+@keyframes cm-plyn {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(calc(var(--cm-dystans, 0px) * -1), 0, 0); }
+}
+
+.cm-karuzela:hover .cm-karuzela-tasma,
+.cm-karuzela:focus-within .cm-karuzela-tasma {
+  animation-play-state: paused;
+}
+
+.cm-karuzela-slajd {
+  flex: 0 0 auto;
+  width: min(340px, 78vw);
+  display: flex;
+}
+
+html body #page-container .cm-karuzela-slajd article.et_pb_post {
+  height: 100%;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+}
+
+html body #page-container .cm-karuzela-slajd .entry-title {
+  font-size: var(--cm-step-1) !important;
+  letter-spacing: -0.005em !important;
+}
+
+html body #page-container .cm-karuzela-slajd .post-meta {
+  font-size: 0.6875rem;
+  letter-spacing: var(--cm-tracking-wide);
+  text-transform: uppercase;
+  color: var(--accent-ink) !important;
+}
+
+html body #page-container .cm-karuzela-slajd .post-content {
+  flex: 1 1 auto;
+}
+
+/* Ruch bywa męczący lub wywołuje mdłości — wtedy taśma stoi i zostaje
+   zwykłą listą, którą można przewinąć palcem albo kółkiem. */
+@media (prefers-reduced-motion: reduce) {
+  .cm-karuzela-gotowa .cm-karuzela-tasma {
+    animation: none;
+  }
+  .cm-karuzela {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+            mask-image: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   20. CreGAAtine — kolory opakowania
+
+   Strona chodzi tym samym układem, co pozostałe produktowe: biel, siatka
+   low-poly, packshot po lewej, nazwa i tabela składu po prawej. Wcześniej
+   miała własny czarny pas otwierający z ukośnym rastrem — wyglądała jak
+   inny serwis i nie dało się jej zestawić z Karnozin extra.
+
+   Zostaje to, co niesie sama etykieta, w dwóch barwach zdjętych z packshotu:
+   czerń pudełka #1f1f1f i żółć karty #fee83a. Podział ról jest ten sam, co
+   na opakowaniu: czerń drukuje litery, żółć jest plamą pod nimi. Żółć na
+   bieli daje 1,25:1, więc nie ma prawa nieść tekstu — i nie niesie.
+   -------------------------------------------------------------------------- */
+
+/* Packshot w ramce. Zdjęcie Karnozin extra ma limonkową obwódkę wypaloną
+   w samym pliku, więc na tamtej stronie kadr jest domknięty; zdjęcie
+   CreGAAtine to goła fotografia na bieli, która na białej stronie rozpływa
+   się w tle. Ramka domyka ją tym samym gestem, w kolorze karty z pudełka.
+   Krawędź jest ostra, bo karta i pudełko też nie mają zaokrągleń. */
+html body.p-cregaatine #et-main-area .et_pb_section:first-of-type .et_pb_gallery_image,
+html body.p-cregaatine #et-main-area .et_pb_section:first-of-type .et_pb_image .et_pb_image_wrap {
+  display: block;
+  border: 4px solid var(--cm-zolc);
+  border-radius: 0;
+}
+
+/* Znak z pudełka: żółty pasek pod nazwą, ścięty pod tym samym kątem
+   co krawędzie opakowania. Zastępuje trójkąt z etykiet. */
+/* Selektor niesie obie klasy produktu, bo współdzielony trójkąt celuje
+   w ten sam pseudoelement z `:has(span[style*="color:"])` i przy słabszej
+   specyficzności wygrywał. */
+/* `:not(:empty)`, bo sekcja otwierająca ma dwa <h1>: pierwszy z nazwą i
+   drugi pusty — u Karnozin extra ten drugi niesie „extra”, tutaj został po
+   nim sam znacznik. Bez tego pasek rysował się dwa razy, drugi raz pod
+   niczym. */
+html body.p-cregaatine.cm-product #et-main-area .et_pb_section:first-of-type h1:not(:empty)::after,
+html body.p-cregaatine.cm-product #et-main-area .et_pb_section:first-of-type h1:has(span[style*="color:"])::after {
+  content: "";
+  display: block;
+  width: 88px;
+  height: 6px;
+  margin: 0.7em auto 0;
+  background-color: var(--cm-zolc);
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+/* Przycisk jak na opakowaniu: pełna żółta plama, czarny napis.
+   Reszta serwisu używa obrysu — tutaj kontrast jest cechą produktu,
+   nie odstępstwem. */
+html body.p-cregaatine #page-container a.et_pb_button,
+html body.p-cregaatine #page-container .et_pb_section a.et_pb_button,
+html body.p-cregaatine #page-container button.et_pb_button {
+  background-color: var(--cm-zolc) !important;
+  border-color: var(--cm-zolc) !important;
+  color: #1f1f1f !important;
+  font-weight: 700 !important;
+}
+
+html body.p-cregaatine #page-container a.et_pb_button:hover,
+html body.p-cregaatine #page-container .et_pb_section a.et_pb_button:hover,
+html body.p-cregaatine #page-container button.et_pb_button:hover {
+  background-color: #1f1f1f !important;
+  border-color: #1f1f1f !important;
+  color: var(--cm-zolc) !important;
+}
+
+/* CTA w nagłówku i pasy akcentu też przechodzą na żółć z czarnym napisem. */
+html body.p-cregaatine #page-container #top-menu li.ds-custom-link-menu > a {
+  background-color: var(--cm-zolc) !important;
+  border-color: var(--cm-zolc) !important;
+  color: #1f1f1f !important;
+}
+
+html body.p-cregaatine #page-container #top-menu li.ds-custom-link-menu > a:hover {
+  background-color: #1f1f1f !important;
+  color: var(--cm-zolc) !important;
+}
+
+/* Poza pasem otwierającym strona wraca na biel, więc żółć nie może nieść
+   tekstu — akcentem tekstowym zostaje czerń pudełka. Wyróżnienia dostają
+   żółte podświetlenie zamiast żółtych liter. */
+html body.p-cregaatine #et-main-area .et_pb_section h2 span[style*="color:"],
+html body.p-cregaatine #et-main-area .et_pb_section h3 span[style*="color:"] {
+  color: #1f1f1f !important;
+  -webkit-text-fill-color: #1f1f1f !important;
+  background-image: linear-gradient(transparent 62%, var(--cm-zolc) 62%);
+  background-repeat: no-repeat;
+  padding: 0 0.12em;
+}
+
+/* Wyróżnienie z ® w środku zostaje samą czernią. Plamę maluje element
+   nadrzędny razem ze swoim paddingiem, więc znak prawny nie da się z niej
+   wyjąć — zasłanianie go tłem zostawiało żółtą obwódkę dookoła. Nazwa
+   produktu i tak nie potrzebuje podświetlenia: na stronie Karnozin extra
+   ta sama nazwa stoi w samym akcencie, bez plamy. */
+html body.p-cregaatine #et-main-area .et_pb_section h2 span[style*="color:"]:has(sup),
+html body.p-cregaatine #et-main-area .et_pb_section h3 span[style*="color:"]:has(sup) {
+  background-image: none;
+  padding: 0;
+}
+
+
+/* --------------------------------------------------------------------------
+   18. Wyśrodkowanie rzędów
+
+   Audyt 32 podstron wykazał 6 stron, na których rzędy stały krzywo we
+   własnym kontenerze: Divi daje im max-width:89% i twarde, nierówne
+   marginesy (zmierzone: margin-left 44px, margin-right 101,8px), przez co
+   treść odjeżdżała w lewo o blisko 60 px. Widać to głównie na wpisach
+   blogowych z kolumną boczną.
+
+   Marginesy poziome przechodzą na auto — szerokość zostaje bez zmian,
+   zmienia się tylko rozkład wolnego miejsca.
+   -------------------------------------------------------------------------- */
+html body #page-container #et-main-area .et_pb_row,
+html body #page-container #et-main-area .et_pb_row_inner,
+html body #page-container #left-area .et_pb_row {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Ikony sekcji to rysunek kreskowy z kolorowymi plamami — sześć różnych
+   barw obok siebie znosi system etykiety. Po odbarwieniu zostaje sama
+   kreska, czyli to, czym etykieta operuje.
+   Dotyczy wyłącznie ikon blurbów; zdjęcia produktów zostają nietknięte. */
+html body #page-container .et_pb_blurb .et_pb_main_blurb_image img,
+html body #page-container .et_pb_blurb_container ~ * img.et-waypoint {
+  filter: grayscale(1) contrast(1.04);
+  opacity: 0.82;
+  transition: opacity 0.25s ease, filter 0.25s ease;
+}
+
+html body #page-container .et_pb_blurb:hover .et_pb_main_blurb_image img {
+  opacity: 1;
+}
+
+/* Przypięta zakładka Facebooka niesie własny błękit i łamie białą bazę */
+html body .aspexi_facebook_button,
+html body .aspexifblikebox .aspexi_facebook_button {
+  filter: grayscale(1) contrast(0.9);
+  opacity: 0.55;
+  transition: opacity 0.25s ease, filter 0.25s ease;
+}
+
+html body .aspexi_facebook_button:hover {
+  filter: none;
+  opacity: 1;
+}
+
+.seo-lead{font-size:1.08em;line-height:1.65;color:#3c3c3c;border-left:3px solid #c2d453;padding:0 0 0 1em;margin:1.2em 0 1.6em}
+.post-updated{white-space:nowrap}
+
+/* --- Znak firmowy w nagłówku ----------------------------------------------
+   Nowy logotyp to jednoliniowy wordmark o proporcji 8,6:1 — ponad dwa razy
+   szerszy od poprzedniego znaku z kolorowymi kostkami. Divi skalował logo
+   procentem wysokości nagłówka (`max-height:54%`), co przy tej proporcji
+   dawało pasek szeroki na pół kontenera i wciśnięty w menu. Wysokość
+   ustawiamy więc wprost w pikselach, a odstęp od nawigacji bierze tyle,
+   ile potrzeba, żeby litery nie zlewały się z pierwszą pozycją menu.
+
+   Kreska znaku ma stałą grubość ok. 0,9 px przy wysokości 30 px — poniżej
+   28 px zaczyna się rozmywać w subpikselu, więc to jest dolna granica. */
+html body #main-header #logo {
+  height: 30px !important;
+  max-height: none !important;
+  width: auto !important;
+  max-width: none !important;
+  margin-right: 2.5rem;
+}
+
+html body #main-header.et-fixed-header #logo {
+  height: 26px !important;
+}
+
+@media (max-width: 980px) {
+  html body #main-header #logo,
+  html body #main-header.et-fixed-header #logo {
+    height: 24px !important;
+    margin-right: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  html body #main-header #logo,
+  html body #main-header.et-fixed-header #logo {
+    height: 20px !important;
+  }
+}
+
+/* Wordmark w treści (stopka, sekcja „o firmie”) trzyma się tej samej
+   miary co logotyp nagłówka, tylko bez sztywnej wysokości — obrazek
+   dostaje szerokość z układu i sam liczy wysokość z proporcji. */
+html body #page-container img[src*="logo-carnomed-kwadrat"] {
+  width: 240px;
+  max-width: 100%;
+  height: auto;
+}

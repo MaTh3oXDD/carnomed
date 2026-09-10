@@ -1,0 +1,37 @@
+# Carnomed
+
+> Carnomed sp. z o.o. to polski producent suplementow diety opartych na naturalnych
+> skladnikach i badaniach naukowych. Firma dziala od 2017 roku, produkuje w standardach
+> ISO i HACCP, prowadzi wlasne badania nad karnozyna wspolnie z Uniwersytetem Medycznym
+> w Nowym Sadzie. Sztandarowy produkt to Karnozin extra (L-karnozyna, 375 mg w porcji
+> dziennej) z certyfikatem Swiatowej Organizacji Antydopingowej.
+
+Dane firmy: Carnomed sp. z o.o., ul. Dolnych Mlynow 3/1, 31-124 Krakow,
+NIP 6762533264, KRS 0000686603, tel. +48 883 190 483, biuro@carno-med.pl.
+
+## Produkty
+- [Przeglad produktow](https://carno-med.pl/produkty/): cztery suplementy Carnomed w jednym miejscu
+- [Karnozin extra](https://carno-med.pl/karnozin-extra/): L-karnozyna, 375 mg w porcji dziennej, 120 kapsulek
+- [creGAAtine](https://carno-med.pl/cregaatine/): monohydrat kreatyny z kwasem guanidynooctowym (GAA), 60 saszetek
+- [Komplex Q10](https://carno-med.pl/komplex-q10/): koenzym Q10, 70 mg w kapsulce, 120 kapsulek
+- [Kolostrum extra Pure Gold](https://carno-med.pl/kolostrum-extra/): kolostrum 500 mg w kapsulce, 120 kapsulek
+
+## Wiedza o karnozynie
+- [Czym jest karnozyna](https://carno-med.pl/karnozyna-substancja-xxi-wieku/): definicja, wystepowanie, dzialanie
+- [Skladniki i badania naukowe](https://carno-med.pl/skladniki/): przeglad skladnikow z odnosnikami do PubMed
+- [Karnozyna a sport](https://carno-med.pl/karnozyna-a-sport-2/): bufor miesniowy, kwas mlekowy, regeneracja
+- [Karnozyna dla seniorow](https://carno-med.pl/karnozyna-dla-seniorow/): procesy starzenia, glikacja
+- [Karnozyna a cukrzyca](https://carno-med.pl/karnozyna-a-cukrzyca/): glikacja bialek, powiklania przewlekle
+- [Karnozyna a spektrum autyzmu](https://carno-med.pl/karnozyna-a-autyzm/): badania dr. Cheza
+- [Karnozyna a wirusy - badania PubMed](https://carno-med.pl/karnozyna-badania-pubmed/): streszczenia publikacji
+- [Stwardnienie rozsiane i karnozyna](https://carno-med.pl/wyniki-badan-stwardnienie-rozsiane-i-karnozyna-artykul-nutrition-research-w-science-direct-carnomed-partnerem-badan/): publikacja w Nutrition Research (Elsevier)
+
+## O firmie
+- [O nas](https://carno-med.pl/o-nas/): historia, certyfikaty, partnerzy naukowi
+- [Kontakt](https://carno-med.pl/kontakt/)
+- [Sklep](https://sklep.carno-med.pl/)
+
+## Zastrzezenie
+Tresci na stronie maja charakter informacyjny i edukacyjny. Nie stanowia porady medycznej
+i nie zastepuja konsultacji z lekarzem. Suplement diety nie moze byc stosowany jako
+substytut zroznicowanej diety.

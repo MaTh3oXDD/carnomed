@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Disallow: /wp-content/plugins/
+Disallow: /wp-includes/
+Disallow: /*?s=
+Disallow: /*?p=
+
+# Crawlery AI — dostep otwarty, tresci moga byc cytowane
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://carno-med.pl/sitemap.xml

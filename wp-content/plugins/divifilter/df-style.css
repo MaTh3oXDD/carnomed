@@ -1,0 +1,5 @@
+html:not(.et-fb-root-ancestor) .df-area:not(.df-rows).df-hide .et_pb_column:not([class^='df-elementindex-']):not([class*=' df-elementindex-']) {
+  margin: 0;
+  padding: 0;
+  height: 0 !important;
+}

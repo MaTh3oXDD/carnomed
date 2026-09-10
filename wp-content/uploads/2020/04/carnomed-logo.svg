@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75.38 8.73" width="754" height="87" role="img" aria-label="CARNOMED">
+  <title>CARNOMED</title>
+  <g fill="none" stroke="#111111" stroke-width="0.825" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10">
+    <!-- C -->
+    <path d="M 7.902 4.570 A 3.7475 3.9475 0 1 1 7.638 2.888"/>
+    <!-- A -->
+    <path d="M 12.355 8.30 L 15.90 1.05 L 19.445 8.30"/>
+    <!-- R -->
+    <path d="M 23.92 0.41 L 28.42 0.41 L 28.42 2.99 L 25.60 3.20 L 29.07 8.29"/>
+    <!-- N -->
+    <path d="M 34.565 0.00 L 34.565 2.89"/>
+    <path d="M 34.565 0.00 L 39.555 8.30"/>
+    <path d="M 39.555 0.00 L 39.555 8.30"/>
+    <!-- O -->
+    <ellipse cx="48.72" cy="4.36" rx="3.7475" ry="3.9475"/>
+    <!-- M (obrocone o 180) -->
+    <path d="M 56.62 2.99 L 58.92 8.30 L 61.62 2.99" stroke-linejoin="bevel"/>
+    <path d="M 61.62 2.99 L 61.62 8.30"/>
+    <!-- E (obrocone o 180) -->
+    <path d="M 64.56 2.99 L 68.72 2.99"/>
+    <path d="M 64.56 6.28 L 67.05 6.28"/>
+    <path d="M 64.56 8.00 L 68.72 8.00"/>
+    <!-- D (obrocone o 180) -->
+    <path d="M 71.21 2.99 L 73.30 2.99 A 1.665 2.555 0 0 1 73.30 8.00 L 71.21 8.00"/>
+  </g>
+</svg>
