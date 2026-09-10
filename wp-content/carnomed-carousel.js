@@ -93,14 +93,22 @@
       clearTimeout(czekaj);
       czekaj = setTimeout(przelicz, 120);
     }
-    // ResizeObserver patrzy na samo okno karuzeli, więc łapie każdą zmianę
-    // jego szerokości — także taką, przy której window nie dostaje "resize"
-    // (zmiana layoutu, pasek przewijania, osadzenie w ramce).
+    // Trzy niezależne wyzwalacze, bo żaden nie wystarcza sam:
+    // - ResizeObserver łapie zmianę szerokości okna karuzeli, także bez
+    //   zdarzenia "resize" (zmiana layoutu, pasek przewijania),
+    //   ale nie odpala, gdy przeglądarka nie renderuje klatek;
+    // - "resize" przychodzi, zanim Divi przeliczy szerokość kontenera,
+    //   więc liczymy drugi raz z opóźnieniem;
+    // - na końcu każdego obiegu taśma i tak wraca na start, więc to
+    //   bezpieczny moment na dołożenie brakujących klonów.
     if (window.ResizeObserver) {
       new ResizeObserver(przeliczPozniej).observe(okno);
-    } else {
-      window.addEventListener("resize", przeliczPozniej);
     }
+    window.addEventListener("resize", function () {
+      przeliczPozniej();
+      setTimeout(przelicz, 600);
+    });
+    tasma.addEventListener("animationiteration", przelicz);
     // obrazy i font dochodzą po starcie i zmieniają szerokość taśmy
     Array.prototype.forEach.call(okno.querySelectorAll("img"), function (img) {
       if (!img.complete) img.addEventListener("load", przelicz);
