@@ -64,20 +64,25 @@
 body.p-kolostrum {
   --cm-mesh-color: var(--accent);
   --cm-mesh-alpha: 0.16;
-  --accent: #bb9b69; --accent-soft: #cdb590; --accent-ink: #8a6d3f;
-  --foil-hi: #e6d3ae; --foil-mid: #bb9b69; --foil-lo: #7d6134;
+  /* Kolostrum Extra Pure Gold — żółć. Grafika w pełnym kolorze,
+     tekst przyciemniony do 6,06:1 na bieli. */
+  --accent: #e3b30f; --accent-soft: #f5d561; --accent-ink: #7a5f00;
+  --foil-hi: #f8e07a; --foil-mid: #e3b30f; --foil-lo: #a07c00;
 }
 body.p-karnozin {
   --cm-mesh-color: var(--accent);
   --cm-mesh-alpha: 0.16;
-  --accent: #864462; --accent-soft: #a6758b; --accent-ink: #864462;
-  --foil-hi: #b07a94; --foil-mid: #864462; --foil-lo: #57263d;
+  /* Karnozin Extra — złoto. Tekst przyciemniony do 5,05:1 na bieli. */
+  --accent: #c29a3a; --accent-soft: #d8bb74; --accent-ink: #8a6a1c;
+  --foil-hi: #ecd9a0; --foil-mid: #c29a3a; --foil-lo: #7f6219;
 }
 body.p-q10 {
   --cm-mesh-color: var(--accent);
   --cm-mesh-alpha: 0.16;
-  --accent: #a7a9ab; --accent-soft: #b2b4b6; --accent-ink: #5f6367;
-  --foil-hi: #d8dade; --foil-mid: #8f9296; --foil-lo: #5f6367;
+  /* Komplex Q10 — fiolet. Na bieli 7,2:1, więc jeden kolor niesie
+     i grafikę, i tekst. */
+  --accent: #6f3fa3; --accent-soft: #9a7bc4; --accent-ink: #6f3fa3;
+  --foil-hi: #b49ad8; --foil-mid: #6f3fa3; --foil-lo: #43246a;
 }
 body.p-stimuno {
   --cm-mesh-color: var(--accent);
