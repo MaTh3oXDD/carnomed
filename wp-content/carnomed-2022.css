@@ -397,7 +397,7 @@ select:focus-visible {
 }
 
 :root {
-  --cm-mesh-src: url("/wp-content/carnomed-mesh.svg");
+  --cm-mesh-src: url("/carnomed/wp-content/carnomed-mesh.svg");
 }
 
 /* Siatka na całej stronie — bardzo cicha, żeby czytała się jako papier
