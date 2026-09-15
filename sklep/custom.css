@@ -55,6 +55,10 @@
   /* Liniowy logotyp CARNOmed ze strony (carnomed-logo.svg, 1,2 KB),
      zamiast kolorowych klocków wgranych w panelu Sellingo. */
   --cm-logo: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NS4zOCA4LjczIiB3aWR0aD0iNzU0IiBoZWlnaHQ9Ijg3IiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNBUk5PTUVEIj4KICA8dGl0bGU+Q0FSTk9NRUQ8L3RpdGxlPgogIDxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzExMTExMSIgc3Ryb2tlLXdpZHRoPSIwLjgyNSIgc3Ryb2tlLWxpbmVjYXA9ImJ1dHQiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCI+CiAgICA8IS0tIEMgLS0+CiAgICA8cGF0aCBkPSJNIDcuOTAyIDQuNTcwIEEgMy43NDc1IDMuOTQ3NSAwIDEgMSA3LjYzOCAyLjg4OCIvPgogICAgPCEtLSBBIC0tPgogICAgPHBhdGggZD0iTSAxMi4zNTUgOC4zMCBMIDE1LjkwIDEuMDUgTCAxOS40NDUgOC4zMCIvPgogICAgPCEtLSBSIC0tPgogICAgPHBhdGggZD0iTSAyMy45MiAwLjQxIEwgMjguNDIgMC40MSBMIDI4LjQyIDIuOTkgTCAyNS42MCAzLjIwIEwgMjkuMDcgOC4yOSIvPgogICAgPCEtLSBOIC0tPgogICAgPHBhdGggZD0iTSAzNC41NjUgMC4wMCBMIDM0LjU2NSAyLjg5Ii8+CiAgICA8cGF0aCBkPSJNIDM0LjU2NSAwLjAwIEwgMzkuNTU1IDguMzAiLz4KICAgIDxwYXRoIGQ9Ik0gMzkuNTU1IDAuMDAgTCAzOS41NTUgOC4zMCIvPgogICAgPCEtLSBPIC0tPgogICAgPGVsbGlwc2UgY3g9IjQ4LjcyIiBjeT0iNC4zNiIgcng9IjMuNzQ3NSIgcnk9IjMuOTQ3NSIvPgogICAgPCEtLSBNIChvYnJvY29uZSBvIDE4MCkgLS0+CiAgICA8cGF0aCBkPSJNIDU2LjYyIDIuOTkgTCA1OC45MiA4LjMwIEwgNjEuNjIgMi45OSIgc3Ryb2tlLWxpbmVqb2luPSJiZXZlbCIvPgogICAgPHBhdGggZD0iTSA2MS42MiAyLjk5IEwgNjEuNjIgOC4zMCIvPgogICAgPCEtLSBFIChvYnJvY29uZSBvIDE4MCkgLS0+CiAgICA8cGF0aCBkPSJNIDY0LjU2IDIuOTkgTCA2OC43MiAyLjk5Ii8+CiAgICA8cGF0aCBkPSJNIDY0LjU2IDYuMjggTCA2Ny4wNSA2LjI4Ii8+CiAgICA8cGF0aCBkPSJNIDY0LjU2IDguMDAgTCA2OC43MiA4LjAwIi8+CiAgICA8IS0tIEQgKG9icm9jb25lIG8gMTgwKSAtLT4KICAgIDxwYXRoIGQ9Ik0gNzEuMjEgMi45OSBMIDczLjMwIDIuOTkgQSAxLjY2NSAyLjU1NSAwIDAgMSA3My4zMCA4LjAwIEwgNzEuMjEgOC4wMCIvPgogIDwvZz4KPC9zdmc+Cg==");
+
+  /* Samo „C" z logotypu — favicon strony (carnomed-znak.webp). Na miejsca,
+     gdzie motyw daje logo tylko kwadrat 36 px. */
+  --cm-znak: url("data:image/webp;base64,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");
 }
 
 /* --- 1. Typografia ------------------------------------------------------- */
@@ -202,6 +206,51 @@ body .m-header-mobile-1__logo-image {
   width: 150px;
   height: 18px;
   padding-left: 150px;
+}
+
+/* Te same klocki siedzą jeszcze w trzech miejscach: kafel w suwaku
+   „Producenci" (strona główna), karta producenta /carnomed-polska i obrazek
+   wklejony w edytorze na /o-nas. Ta sama technika, wymiary dopasowane do
+   miejsca. Suwak ma leniwe ładowanie (data-src) — sztywne wymiary sprawiają,
+   że logo stoi, zanim skrypt podmieni src. */
+body :is(.m-manufacturers-panel-1__slider-image,
+         .m-manufacturer-description-1__image,
+         img[src*="logo-ostatnie-tla-pod-kwadratami"]) {
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: none;
+  overflow: hidden;
+  background: var(--cm-logo) no-repeat 0 50% / contain;
+}
+
+body .m-manufacturers-panel-1__slider-image {
+  width: 150px;
+  height: 18px;
+  padding-left: 150px;
+}
+
+body .m-manufacturer-description-1__image {
+  width: 240px;
+  height: 28px;
+  padding-left: 240px;
+}
+
+body img[src*="logo-ostatnie-tla-pod-kwadratami"] {
+  display: inline-block;
+  width: 270px;
+  height: 31px;
+  padding-left: 270px;
+}
+
+/* Szuflada mobilna: motyw wstawia tu favicon z panelu (kolorowe „C" w klocku)
+   w kwadracie max 36 px. Pełny napis byłby nieczytelny, więc idzie znak. */
+body .m-mobile-nav-3__logo-image {
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  padding-left: 36px;
+  overflow: hidden;
+  background: var(--cm-znak) no-repeat 50% 50% / contain;
 }
 
 body .m-menu-1__link {
