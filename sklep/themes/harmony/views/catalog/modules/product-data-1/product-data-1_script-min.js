@@ -1,0 +1,1 @@
+$(function(){$(document).on("keydown",".at-product-data-ask",function(t){"Enter"===t.key&&(t.preventDefault(),$(this).find(".js-open-modal").trigger("click"))}),$(document).on("keydown",".js-select-product-variant",function(t){"Enter"===t.key&&(t.preventDefault(),$(this).trigger("click"))})});

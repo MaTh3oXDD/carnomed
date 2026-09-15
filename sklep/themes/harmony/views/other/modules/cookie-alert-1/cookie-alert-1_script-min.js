@@ -1,0 +1,1 @@
+$(function(){$(document).on("click",".js-accept-cookie-alert-1",function(){$(".js-cookie-alert-1").remove()})});

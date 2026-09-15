@@ -1,0 +1,1 @@
+.m-banner-4__wrapper{display:grid;grid-template-columns:repeat(3, calc(33% - 22px));gap:32px}@media(max-width: 768px){.m-banner-4__wrapper{grid-template-columns:100%;gap:16px}}.m-banner-4 .c-slider__pagination{display:none}

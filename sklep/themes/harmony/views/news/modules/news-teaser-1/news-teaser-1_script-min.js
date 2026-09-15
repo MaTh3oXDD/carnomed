@@ -1,0 +1,1 @@
+$(function(){$(document).on("click",".js-go-to-article",function(){$(window).outerWidth()<=1024&&(window.location.href=$(this).find("a").attr("href"))})});

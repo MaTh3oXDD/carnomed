@@ -1,0 +1,1 @@
+.m-checkboxes-filter-1{margin-bottom:48px}@media(max-width: 768px){.m-checkboxes-filter-1{margin-bottom:32px}}.m-checkboxes-filter-1__list{overflow:hidden;width:calc(100% + 8px);padding:0 4px;margin:0 -4px}.m-checkboxes-filter-1__item:nth-child(n+6){display:none}.m-checkboxes-filter-1__list.is-active .m-checkboxes-filter-1__item:nth-child(n+6){display:block}

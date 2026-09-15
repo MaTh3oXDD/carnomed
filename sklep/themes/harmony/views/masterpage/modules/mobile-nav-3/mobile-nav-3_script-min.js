@@ -1,0 +1,1 @@
+$(function(){$(document).on("focusin","input[type=text], input[type=email], input[type=password], input[type=number], input[type=tel], textarea",function(){$(".js-mobile-nav").addClass("u-hide")}),$(document).on("focusout","input",function(){$(".js-mobile-nav").removeClass("u-hide")})});
