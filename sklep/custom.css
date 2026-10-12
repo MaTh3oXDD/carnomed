@@ -23,10 +23,10 @@
    ============================================================================ */
 
 :root {
-  /* kolory zdjęte ze strony */
-  --cm-zielen:       #3b7845;   /* tekst i wypełnienia */
-  --cm-zielen-obrys: #41854c;   /* obrysy, pas pod nagłówkiem, ramki zdjęć */
-  --cm-zielen-hover: #2e5f36;
+  /* złoto z etykiety Karnozin Extra (nazwy zmiennych zostały po zieleni) */
+  --cm-zielen:       #8a6a1c;   /* tekst i wypełnienia */
+  --cm-zielen-obrys: #c29a3a;   /* obrysy, pas pod nagłówkiem, ramki zdjęć */
+  --cm-zielen-hover: #6e5416;
   --cm-grafit:       #1a1a1a;   /* nagłówki sekcji */
   --cm-tekst:        #313131;   /* tytuły, wartości, menu */
   --cm-tekst-sluzb:  #6b6969;   /* akapity, etykiety */
@@ -392,7 +392,7 @@ body .c-label {
 }
 
 /* --- 6. Przyciski --------------------------------------------------------- */
-/* Cała strona używa przycisku z obrysem: przezroczyste tło, kreska #41854C,
+/* Cała strona używa przycisku z obrysem: przezroczyste tło, kreska #C29A3A,
    zielony tekst, prostokąt, rozstrzelenie 0,14em. Pełną zieleń dostaje
    wyłącznie akcja główna — na stronie „Nasz sklep", w sklepie koszyk. */
 
@@ -496,7 +496,7 @@ body :is(.c-input-field__input,
 body :is(.c-input-field__input, .c-textarea-field__textarea):focus {
   border-color: var(--cm-zielen-obrys);
   background-color: #fff;
-  box-shadow: 0 0 0 2px rgba(59, 120, 69, 0.12);
+  box-shadow: 0 0 0 2px rgba(138, 106, 28, 0.12);
 }
 
 body :is(.c-input-field__label, .c-textarea-field__label, .c-checkbox-field__label) {
