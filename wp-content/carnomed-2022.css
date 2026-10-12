@@ -96,6 +96,13 @@ body.p-sulforafan {
   --accent: #41854c; --accent-soft: #73a57b; --accent-ink: #41854c;
   --foil-hi: #7fb389; --foil-mid: #41854c; --foil-lo: #2a5a32;
 }
+/* Strona główna — złoto z etykiety Karnozin Extra zamiast zieleni. */
+body.home {
+  --cm-mesh-color: var(--accent);
+  --cm-mesh-alpha: 0.16;
+  --accent: #c29a3a; --accent-soft: #d8bb74; --accent-ink: #8a6a1c;
+  --foil-hi: #ecd9a0; --foil-mid: #c29a3a; --foil-lo: #7f6219;
+}
 
 /* CreGAAtine stoi poza systemem etykiet z 2022 — nie ma białej etykiety
    z cienką siatką, tylko czarne pudełko z jaskrawą żółcią. Kolory wzięte
