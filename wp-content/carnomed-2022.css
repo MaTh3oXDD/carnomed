@@ -22,30 +22,27 @@
   --cm-hairline:     #e2e2e2;
   --cm-hairline-strong: #c9c8c6;
 
-  /* Akcent stron nieprodukowych — zieleń z etykiety Sulforafan Extra.
-     Kolor nie jest wymyślony: to ta sama wartość, którą nosi jedno
-     z opakowań, więc strona bierze go z własnej linii produktowej,
-     zamiast dokładać barwę spoza systemu.
+  /* Akcent stron nieprodukowych — złoto z etykiety Karnozin Extra, to samo
+     co w logo 2026 i na stronie głównej. Wcześniej była tu zieleń
+     Sulforafanu; złoto wiąże podstrony z logo i głównym produktem.
 
-     Rozdzielony na dwie role, bo #41854c daje na bieli 4,48:1 — tuż
-     poniżej progu czytelności. Grafika (siatka, obrysy, pasy) zostaje
-     w pełnym kolorze etykiety, tekst schodzi do ciemniejszego 5,31:1. */
-  --accent:      #41854c;
-  --accent-soft: #73a57b;
-  --accent-ink:  #3b7845;
+     Rozdzielone na dwie role, bo #c29a3a daje na bieli tylko 2,6:1.
+     Grafika (siatka, obrysy, pasy) zostaje w pełnym kolorze etykiety,
+     tekst schodzi do ciemniejszego #8a6a1c, 5,05:1. */
+  --accent:      #c29a3a;
+  --accent-soft: #d8bb74;
+  --accent-ink:  #8a6a1c;
 
   /* Folia. Nazwa produktu na opakowaniu jest tłoczona metalicznie —
      jasny błysk u góry, ciemniejsze wybrzuszenie u dołu. Trzy stopnie
      odtwarzają ten gradient na tekście. */
-  /* Siatka rysuje się akcentem. Zieleń jest nasycona, więc krycie schodzi
-     do wartości używanej na stronach produktowych — przy 0,5, dobranym
-     wcześniej pod bladą szarość, wzór przebijałby przez treść. */
+  /* Siatka rysuje się akcentem, z kryciem jak na stronach produktowych. */
   --cm-mesh-color: var(--accent);
-  --cm-mesh-alpha: 0.2;
+  --cm-mesh-alpha: 0.16;
 
-  --foil-hi:  #7fb389;
-  --foil-mid: #41854c;
-  --foil-lo:  #2a5a32;
+  --foil-hi:  #ecd9a0;
+  --foil-mid: #c29a3a;
+  --foil-lo:  #7f6219;
 
   --cm-font: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
@@ -95,13 +92,6 @@ body.p-sulforafan {
   --cm-mesh-alpha: 0.16;
   --accent: #41854c; --accent-soft: #73a57b; --accent-ink: #41854c;
   --foil-hi: #7fb389; --foil-mid: #41854c; --foil-lo: #2a5a32;
-}
-/* Strona główna — złoto z etykiety Karnozin Extra zamiast zieleni. */
-body.home {
-  --cm-mesh-color: var(--accent);
-  --cm-mesh-alpha: 0.16;
-  --accent: #c29a3a; --accent-soft: #d8bb74; --accent-ink: #8a6a1c;
-  --foil-hi: #ecd9a0; --foil-mid: #c29a3a; --foil-lo: #7f6219;
 }
 
 /* CreGAAtine stoi poza systemem etykiet z 2022 — nie ma białej etykiety
@@ -2094,7 +2084,7 @@ html body .aspexi_facebook_button:hover {
   opacity: 1;
 }
 
-.seo-lead{font-size:1.08em;line-height:1.65;color:#3c3c3c;border-left:3px solid #c2d453;padding:0 0 0 1em;margin:1.2em 0 1.6em}
+.seo-lead{font-size:1.08em;line-height:1.65;color:#3c3c3c;border-left:3px solid var(--accent);padding:0 0 0 1em;margin:1.2em 0 1.6em}
 .post-updated{white-space:nowrap}
 
 /* --- Znak firmowy w nagłówku ----------------------------------------------
@@ -2241,4 +2231,19 @@ html body #page-container img[src*="logo-carnomed-kwadrat"] {
   #top-menu { gap: 11px; }
   #top-menu li a { letter-spacing: 0.03em !important; font-size: 0.6875rem !important; }
   html body #page-container #top-menu li.ds-custom-link-menu > a { padding: 0.55em 0.8em !important; }
+}
+
+/* --- Ostatnie zielenie z czasów limonkowej strony -------------------------
+   Akcent stron nieprodukowych to od 2026 złoto (sekcja 1). Te miejsca miały
+   kolor wpisany na sztywno i nie słuchały tokenów:
+   - ramka „Treść ma charakter informacyjny” pod wpisami: inline #c2d453,
+   - liczniki Divi („3361 wykonanych badań HRV”): #729d3e!important
+     w arkuszu sekcji, z klasą licznika (0-3-1), więc tu 1-4-2. */
+html body aside.medical-disclaimer {
+  border-left-color: var(--accent) !important;
+}
+
+html body #page-container .et_pb_number_counter .percent p,
+html body #page-container .et_pb_number_counter .percent-value {
+  color: var(--accent-ink) !important;
 }
