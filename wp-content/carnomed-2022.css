@@ -2105,10 +2105,13 @@ html body .aspexi_facebook_button:hover {
    ustawiamy więc wprost w pikselach, a odstęp od nawigacji bierze tyle,
    ile potrzeba, żeby litery nie zlewały się z pierwszą pozycją menu.
 
-   Kreska znaku ma stałą grubość ok. 0,9 px przy wysokości 30 px — poniżej
-   28 px zaczyna się rozmywać w subpikselu, więc to jest dolna granica. */
+   Logo z 2026 (romby z CM + CARNOMED) ma proporcję 4,9:1, więc dostaje
+   52 px wysokości: wychodzi ok. 254 px szerokości, tyle co poprzedni
+   wordmark, i menu nie musi się przesuwać. Kreska rombów ma przy tej
+   wysokości 0,75 px; poniżej ok. 34 px romby bledną, stąd dolna granica
+   na telefonie. */
 html body #main-header #logo {
-  height: 30px !important;
+  height: 52px !important;
   max-height: none !important;
   width: auto !important;
   max-width: none !important;
@@ -2116,13 +2119,13 @@ html body #main-header #logo {
 }
 
 html body #main-header.et-fixed-header #logo {
-  height: 26px !important;
+  height: 44px !important;
 }
 
 @media (max-width: 980px) {
   html body #main-header #logo,
   html body #main-header.et-fixed-header #logo {
-    height: 24px !important;
+    height: 40px !important;
     margin-right: 1rem;
   }
 }
@@ -2130,13 +2133,14 @@ html body #main-header.et-fixed-header #logo {
 @media (max-width: 480px) {
   html body #main-header #logo,
   html body #main-header.et-fixed-header #logo {
-    height: 20px !important;
+    height: 34px !important;
   }
 }
 
-/* Wordmark w treści (stopka, sekcja „o firmie”) trzyma się tej samej
+/* Logo w treści (stopka, sekcja „o firmie”) trzyma się tej samej
    miary co logotyp nagłówka, tylko bez sztywnej wysokości — obrazek
    dostaje szerokość z układu i sam liczy wysokość z proporcji. */
+html body #page-container img[src*="carnomed-logo.svg"]:not(#logo),
 html body #page-container img[src*="logo-carnomed-kwadrat"] {
   width: 240px;
   max-width: 100%;
